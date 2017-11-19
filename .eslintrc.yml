@@ -1,0 +1,20 @@
+parser: babel-eslint
+parserOptions:
+  ecmaFeatures:
+    jsx: true
+    experimentalObjectRestSpread: true
+extends: airbnb
+rules:
+  no-case-declarations: off
+  global-require: off
+  react/jsx-curly-spacing:
+    - error
+    - always
+  react/forbid-prop-types: off
+  react/prefer-stateless-function: off
+  import/no-extraneous-dependencies: [error, { devDependencies: true }]
+  import/prefer-default-export: off
+env:
+  browser: true
+  mocha: true
+  node: true
