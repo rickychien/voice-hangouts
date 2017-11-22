@@ -1,0 +1,23 @@
+.chats {
+  width: 300px;
+  height: 250px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.roomTitle {
+  text-align: center;
+}
+
+.messages {
+  flex: 1;
+}
+
+.messageRow {
+
+}
+
+.messageInput {
+  width: 100%;
+}

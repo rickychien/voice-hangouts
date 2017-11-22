@@ -5,6 +5,11 @@ parserOptions:
     experimentalObjectRestSpread: true
 extends: airbnb
 rules:
+  arrow-parens:
+    - error
+    - always
+  function-paren-newline: off
+  class-methods-use-this: off
   no-case-declarations: off
   global-require: off
   react/jsx-curly-spacing:
