@@ -7,11 +7,10 @@ export function updateClient(uuid) {
   };
 }
 
-export function addMessage(uuid, userName, message) {
+export function addMessage(userName, message) {
   return {
     type: 'ADD_MESSAGE',
     payload: {
-      uuid,
       userName,
       message,
     },

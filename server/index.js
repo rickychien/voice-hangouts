@@ -25,8 +25,9 @@ router.get('/*', async (ctx) => {
 
 wsRouter.get('/message', (ctx) => {
   const { websocket } = ctx;
+  const { clients } = app.ws.server;
   websocket.on('message', (message) => {
-    hangout.onMessage(websocket, message);
+    hangout.onMessage(clients, websocket, message);
   });
 });
 

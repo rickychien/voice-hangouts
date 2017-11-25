@@ -17,8 +17,8 @@ class App extends React.PureComponent {
   };
 
   state = {
-    roomName: '',
-    userName: '',
+    roomName: 'test',
+    userName: 'bob',
     message: '',
   };
 
@@ -46,13 +46,16 @@ class App extends React.PureComponent {
     this.setState({ [name]: value });
   }
 
+  onCall = () => {
+    this.props.connector.makeCall(this.props.uuid);
+  }
+
   onSendMessage = (evt) => {
     const { key } = evt;
     const { message } = this.state;
-    const { uuid } = this.props;
 
     if (key === 'Enter' && message) {
-      this.props.connector.sendMessage(uuid, message);
+      this.props.connector.sendMessage(message);
       this.setState({ message: '' });
     }
   }
@@ -69,21 +72,21 @@ class App extends React.PureComponent {
             <div className={ styles.app }>
               <h2 className={ styles.roomTitle }>Start a chatroom</h2>
               <input
-                className={ styles.loginInput }
+                className={ styles.chatInput }
                 name="roomName"
                 placeholder="Room name"
                 value={ roomName }
                 onChange={ this.onInputChange }
               />
               <input
-                className={ styles.loginInput }
+                className={ styles.chatInput }
                 name="userName"
                 placeholder="User name"
                 value={ userName }
                 onChange={ this.onInputChange }
               />
               <input
-                className={ styles.loginInput }
+                className={ styles.chatInput }
                 type="submit"
                 value="Join a room"
                 onClick={ this.onJoinRoom }
@@ -110,6 +113,12 @@ class App extends React.PureComponent {
                 value={ message }
                 onChange={ this.onInputChange }
                 onKeyPress={ this.onSendMessage }
+              />
+              <input
+                className={ styles.chatInput }
+                type="submit"
+                value="Call"
+                onClick={ this.onCall }
               />
             </div>
         }

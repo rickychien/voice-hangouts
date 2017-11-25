@@ -2,8 +2,6 @@ class Connector {
   constructor(url, actions) {
     this.ws = new WebSocket(url);
     this.actions = actions;
-
-    this.connect();
   }
 
   connect() {
@@ -19,17 +17,29 @@ class Connector {
       }
 
       switch (type) {
-        case 'joined':
-          this.actions.updateClient(payload.uuid);
+        case 'joined': {
+          this.handleJoined(payload);
           break;
-        case 'message':
-          this.actions.addMessage(payload.uuid, payload.userName, payload.message);
+        }
+        case 'offer': {
+          this.handleOffer(payload);
           break;
-        case 'left':
-          this.actions.updateClient(undefined);
+        }
+        case 'answer': {
+          this.handleAnswer(payload);
           break;
-        default:
+        }
+        case 'candidate': {
+          this.handleCandidate(payload);
           break;
+        }
+        case 'message': {
+          this.handleMessage(payload);
+          break;
+        }
+        default: {
+          break;
+        }
       }
     });
 
@@ -40,6 +50,80 @@ class Connector {
 
   send(data) {
     this.ws.send(JSON.stringify(data));
+  }
+
+  handleJoined({ uuid }) {
+    this.actions.updateClient(uuid);
+
+    // Starting a WebRTC peer connection after joining room successfully
+
+    this.rtcPeerConn = new RTCPeerConnection({
+      // Using Google public stun server
+      iceServers: [{ url: 'stun:stun2.1.google.com:19302' }],
+    }, {
+      optional: [{ RtpDataChannels: true }],
+    });
+
+    this.rtcPeerConn.addEventListener('icecandidate', (evt) => {
+      if (evt.candidate) {
+        this.send({
+          type: 'candidate',
+          payload: {
+            candidate: evt.candidate,
+          },
+        });
+      }
+    });
+
+    this.rtcPeerConn.addEventListener('error', (err) => {
+      console.info(err);
+    });
+
+    // when we receive a message from the other peer, display it on the screen
+    this.rtcPeerConn.addEventListener('message', (evt) => {
+      console.info(evt.data);
+    });
+
+    this.rtcPeerConn.addEventListener('close', () => {
+      console.info('data channel is closed');
+    });
+
+    // Creating data channel
+    this.dataChannel = this.rtcPeerConn.createDataChannel('channel1', { reliable: true });
+  }
+
+  handleOffer({ uuid, offer }) {
+    console.info('Received offer: ', offer);
+    this.rtcPeerConn.setRemoteDescription(new RTCSessionDescription(offer));
+
+    // Create an answer to an offer
+    this.rtcPeerConn.createAnswer().then((answer) => {
+      this.rtcPeerConn.setLocalDescription(answer);
+      this.send({
+        type: 'answer',
+        payload: {
+          uuid,
+          answer,
+        },
+      });
+      console.info('Sent answer: ', answer);
+    }).catch(() => {
+      console.info('Error when creating an answer');
+    });
+  }
+
+  handleAnswer({ answer }) {
+    console.info('Received answer: ', answer);
+    this.rtcPeerConn.setRemoteDescription(new RTCSessionDescription(answer));
+  }
+
+  handleCandidate({ candidate }) {
+    console.info('Received candidate: ', candidate);
+    this.rtcPeerConn.addIceCandidate(new RTCIceCandidate(candidate));
+  }
+
+  handleMessage({ userName, message }) {
+    this.actions.addMessage(userName, message);
   }
 
   joinRoom(roomName, userName) {
@@ -53,27 +137,38 @@ class Connector {
     });
   }
 
-  sendMessage(uuid, message) {
+  leaveRoom() {
+    if (this.rtcPeerConn) {
+      this.rtcPeerConn.close();
+      this.rtcPeerConn.onicecandidate = null;
+    }
+
+    this.actions.updateClient(undefined);
+  }
+
+  sendMessage(message) {
     // Notify server a message event
     this.send({
       type: 'message',
       payload: {
-        uuid,
         message,
       },
     });
   }
 
-  leaveRoom(uuid) {
-    if (uuid) {
-      // Notify server a leave event
+  makeCall() {
+    this.rtcPeerConn.createOffer().then((offer) => {
       this.send({
-        type: 'leave',
+        type: 'offer',
         payload: {
-          uuid,
+          offer,
         },
       });
-    }
+      console.info('Sent offer: ', offer);
+      this.rtcPeerConn.setLocalDescription(offer);
+    }).catch(() => {
+      console.info('Error when creating an offer');
+    });
   }
 }
 

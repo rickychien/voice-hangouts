@@ -1,48 +1,48 @@
 const uuidv4 = require('uuid/v4');
 
 class Hangout {
-  constructor() {
-    this.rooms = new Map();
-  }
-
   send(ws, data) {
     ws.send(JSON.stringify(data));
   }
 
-  onMessage(ws, message) {
+  onMessage(wsClients, ws, message) {
     const { type, ...data } = JSON.parse(message);
 
     switch (type) {
       case 'join': {
-        this.onClientJoin(ws, data);
+        this.onClientJoin(wsClients, ws, data);
+        break;
+      }
+      case 'offer': {
+        this.onClientOffer(wsClients, ws, data);
+        break;
+      }
+      case 'answer': {
+        this.onClientAnswer(wsClients, ws, data);
+        break;
+      }
+      case 'candidate': {
+        // this.onClientCandidate(wsClients, ws, data);
         break;
       }
       case 'message': {
-        this.onClientMessage(ws, data);
+        this.onClientMessage(wsClients, ws, data);
         break;
       }
       case 'leave': {
-        this.onClientLeave(ws, data);
+        this.onClientLeave(wsClients, ws, data);
         break;
       }
-      default:
+      default: {
         break;
+      }
     }
   }
 
-  onClientJoin(ws, data) {
+  onClientJoin(wsClients, ws, data) {
     const { roomName, userName } = data.payload;
-    const { rooms } = this;
-    const clients = rooms.get(roomName) || new Map();
 
-    // Create a new room if the room doesn't exist.
-    if (clients.size === 0) {
-      rooms.set(roomName, clients);
-
-      console.info(`[Room] '${roomName}' has created.`);
-    }
-
-    if (clients.has(userName)) {
+    if (wsClients.has(userName)) {
       // Reject client if username has been used.
       this.send(ws, {
         type: 'join',
@@ -55,13 +55,10 @@ class Hangout {
       // Generate unique id for the new client
       const uuid = uuidv4();
 
-      // Store client in server
-      clients.set(uuid, {
-        uuid,
-        userName,
-        roomName,
-        ws,
-      });
+      // Store the client
+      ws.uuid = uuid;
+      ws.userName = userName;
+      ws.roomName = roomName;
 
       // Send vaild uuid back to client
       this.send(ws, {
@@ -76,57 +73,81 @@ class Hangout {
     }
   }
 
-  onClientMessage(ws, data) {
-    const { uuid, message } = data.payload;
-    const { rooms } = this;
-    let roomClients;
+  onClientOffer(wsClients, ws, data) {
+    const { offer } = data.payload;
 
-    for (let clients of rooms.values()) {
-      if (clients.has(uuid)) {
-        roomClients = clients;
-        break;
+    // Broadcast offer to other clients in the same room.
+    for (let wsClient of wsClients) {
+      if (wsClient.roomName === ws.roomName && wsClient.uuid !== ws.uuid) {
+        console.info(`[Singaling] ${ws.userName} sending offer to: ${wsClient.userName}`);
+        this.send(wsClient, {
+          type: 'offer',
+          payload: {
+            uuid: ws.uuid,
+            offer,
+          },
+          error: null,
+        });
       }
     }
+  }
 
-    if (!roomClients) {
-      this.send(ws, {
-        type: 'message',
-        payload: {},
-        error: 'invalid room name',
-      });
-    } else {
-      // Broadcast message to all clients in the same room.
-      roomClients.forEach((client) => {
-        this.send(client.ws, {
+  onClientAnswer(wsClients, ws, data) {
+    const { answer, uuid } = data.payload;
+
+    // Send answer to the target client
+    for (let wsClient of wsClients) {
+      if (wsClient.uuid === uuid) {
+        console.info(`[Singaling] ${ws.userName} sending answer to: ${wsClient.userName}`);
+        this.send(wsClient, {
+          type: 'answer',
+          payload: {
+            answer,
+          },
+          error: null,
+        });
+      }
+    }
+  }
+
+  onClientCandidate(wsClients, ws, data) {
+    const { candidate } = data.payload;
+
+    // Broadcast candidate to the target client
+    for (let wsClient of wsClients) {
+      if (wsClient.uuid === uuid) {
+        console.info(`[Singaling] ${ws.userName} sending candidate to: ${wsClient.userName}`);
+        this.send(wsClient, {
+          type: 'candidate',
+          payload: {
+            candidate,
+          },
+          error: null,
+        });
+      }
+    }
+  }
+
+  onClientMessage(wsClients, ws, data) {
+    const { message } = data.payload;
+
+    // Broadcast message to all clients in the same room.
+    for (let wsClient of wsClients) {
+      if (wsClient.roomName === ws.roomName) {
+        this.send(wsClient, {
           type: 'message',
           payload: {
-            uuid,
-            userName: roomClients.get(uuid).userName,
+            userName: ws.userName,
             message,
           },
           error: null,
         });
-      });
+      }
     }
   }
 
-  onClientLeave(ws, data) {
-    const { uuid } = data.payload;
-    const { rooms } = this;
-
-    rooms.forEach((clients, room) => {
-      if (clients.has(uuid)) {
-        console.info(`[User] '${clients.get(uuid).userName}' left room '${room}'.`);
-        clients.delete(uuid);
-
-        // Destroy the room if there is no one in the room.
-        if (clients.size === 0) {
-          rooms.delete(room);
-
-          console.info(`[Room] '${room}' has been destroyed.`);
-        }
-      }
-    });
+  onClientLeave(wsClients, ws) {
+    console.info(`[User] '${ws.userName}' left room '${ws.roomName}'.`);
   }
 }
 

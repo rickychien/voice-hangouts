@@ -10,13 +10,12 @@ export default function (state = initialState, { type, payload }) {
     case 'UPDATE_CLIENT':
       return { ...state, ...{ uuid: payload.uuid } };
     case 'ADD_MESSAGE':
-      const { uuid, userName, message } = payload;
+      const { userName, message } = payload;
       mid += 1;
       return {
         ...state,
         messages: [...state.messages, {
           mid,
-          uuid,
           userName,
           message,
         }],
