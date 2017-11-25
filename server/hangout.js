@@ -50,7 +50,7 @@ class Hangout {
         error: `Username ${userName} has been used`,
       });
 
-      console.info(`[Client] '${userName}' has been rejected due to same user existed.`);
+      console.info(`[User] '${userName}' has been rejected due to same user existed.`);
     } else {
       // Generate unique id for the new client
       const uuid = uuidv4();
@@ -72,7 +72,7 @@ class Hangout {
         error: null,
       });
 
-      console.info(`[Client] '${userName}' joined ${roomName}.`);
+      console.info(`[User] '${userName}' joined room '${roomName}'.`);
     }
   }
 
@@ -116,7 +116,7 @@ class Hangout {
 
     rooms.forEach((clients, room) => {
       if (clients.has(uuid)) {
-        console.info(`[Client] '${clients.get(uuid).username}' left ${room}.`);
+        console.info(`[User] '${clients.get(uuid).userName}' left room '${room}'.`);
         clients.delete(uuid);
 
         // Destroy the room if there is no one in the room.

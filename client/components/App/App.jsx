@@ -22,9 +22,23 @@ class App extends React.PureComponent {
     message: '',
   };
 
+  componentDidMount() {
+    this.props.connector.connect();
+
+    window.addEventListener('beforeunload', this.onLeaveRoom);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener(this.onLeaveRoom);
+  }
+
   onJoinRoom = () => {
     const { roomName, userName } = this.state;
     this.props.connector.joinRoom(roomName, userName);
+  }
+
+  onLeaveRoom = () => {
+    this.props.connector.leaveRoom(this.props.uuid);
   }
 
   onInputChange = (evt) => {

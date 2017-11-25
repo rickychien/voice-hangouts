@@ -3,6 +3,10 @@ class Connector {
     this.ws = new WebSocket(url);
     this.actions = actions;
 
+    this.connect();
+  }
+
+  connect() {
     this.ws.addEventListener('open', () => {
       console.info('Websocket connected');
     });
@@ -16,13 +20,13 @@ class Connector {
 
       switch (type) {
         case 'joined':
-          actions.updateClient(payload.uuid);
+          this.actions.updateClient(payload.uuid);
           break;
         case 'message':
-          actions.addMessage(payload.uuid, payload.userName, payload.message);
+          this.actions.addMessage(payload.uuid, payload.userName, payload.message);
           break;
         case 'left':
-          actions.updateClient(undefined);
+          this.actions.updateClient(undefined);
           break;
         default:
           break;
@@ -61,13 +65,15 @@ class Connector {
   }
 
   leaveRoom(uuid) {
-    // Notify server a leave event
-    this.send({
-      type: 'leave',
-      payload: {
-        uuid,
-      },
-    });
+    if (uuid) {
+      // Notify server a leave event
+      this.send({
+        type: 'leave',
+        payload: {
+          uuid,
+        },
+      });
+    }
   }
 }
 
