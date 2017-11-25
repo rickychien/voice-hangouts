@@ -49,31 +49,34 @@ class App extends React.PureComponent {
 
     return (
       <div className="app">
-        <h1>Hangout</h1>
+        <h1 className={ styles.appTitle }>Hangout</h1>
         {
           !uuid ?
-            <div>
-              <h2>Start a room</h2>
+            <div className={ styles.app }>
+              <h2 className={ styles.roomTitle }>Start a chatroom</h2>
               <input
+                className={ styles.loginInput }
                 name="roomName"
                 placeholder="Room name"
                 value={ roomName }
                 onChange={ this.onInputChange }
               />
               <input
+                className={ styles.loginInput }
                 name="userName"
                 placeholder="User name"
                 value={ userName }
                 onChange={ this.onInputChange }
               />
               <input
+                className={ styles.loginInput }
                 type="submit"
                 value="Join a room"
                 onClick={ this.onJoinRoom }
               />
             </div>
          :
-            <div className={ styles.chats }>
+            <div className={ styles.app }>
               <div className={ styles.roomTitle }>Room <strong>{ roomName }</strong></div>
               <div className={ styles.messages }>
                 {
