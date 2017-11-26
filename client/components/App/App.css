@@ -33,3 +33,9 @@
 .messageInput {
   width: 100%;
 }
+
+.video {
+  width: 180px;
+  height: 100px;
+  transform: rotateY(180deg);
+}

@@ -14,6 +14,7 @@ class App extends React.PureComponent {
     connector: PropTypes.object.isRequired,
     uuid: PropTypes.string,
     messages: PropTypes.array,
+    peers: PropTypes.object.isRequired,
   };
 
   state = {
@@ -23,8 +24,6 @@ class App extends React.PureComponent {
   };
 
   componentDidMount() {
-    this.props.connector.connect();
-
     window.addEventListener('beforeunload', this.onLeaveRoom);
   }
 
@@ -34,6 +33,7 @@ class App extends React.PureComponent {
 
   onJoinRoom = () => {
     const { roomName, userName } = this.state;
+    this.props.connector.connect();
     this.props.connector.joinRoom(roomName, userName);
   }
 
@@ -44,10 +44,6 @@ class App extends React.PureComponent {
   onInputChange = (evt) => {
     const { target: { name, value } } = evt;
     this.setState({ [name]: value });
-  }
-
-  onCall = () => {
-    this.props.connector.makeCall(this.props.uuid);
   }
 
   onSendMessage = (evt) => {
@@ -61,7 +57,7 @@ class App extends React.PureComponent {
   }
 
   render() {
-    const { uuid, messages } = this.props;
+    const { uuid, messages, peers } = this.props;
     const { message, roomName, userName } = this.state;
 
     return (
@@ -114,12 +110,16 @@ class App extends React.PureComponent {
                 onChange={ this.onInputChange }
                 onKeyPress={ this.onSendMessage }
               />
-              <input
-                className={ styles.chatInput }
-                type="submit"
-                value="Call"
-                onClick={ this.onCall }
-              />
+              {
+                Array.from(peers).filter(([, peer]) => peer.stream).map(([id, peer]) => (
+                  <video
+                    key={ id }
+                    autoPlay
+                    className={ styles.video }
+                    src={ peer.stream ? URL.createObjectURL(peer.stream) : '' }
+                  />
+                ))
+              }
             </div>
         }
       </div>
@@ -131,5 +131,6 @@ export default connect(
   (state) => ({
     uuid: state.uuid,
     messages: state.messages,
+    peers: state.peers,
   }),
 )(App);

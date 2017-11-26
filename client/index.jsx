@@ -10,7 +10,7 @@ import App from './components/App';
 
 const store = configureStore();
 const actions = bindActionCreators(Actions, store.dispatch);
-const connector = new Connector('ws://localhost:3000/message', actions);
+const connector = new Connector('ws://localhost:3000/message', actions, store);
 
 render(
   <Provider store={ store }>

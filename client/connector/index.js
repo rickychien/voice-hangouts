@@ -1,7 +1,8 @@
 class Connector {
-  constructor(url, actions) {
+  constructor(url, actions, store) {
     this.ws = new WebSocket(url);
     this.actions = actions;
+    this.store = store;
   }
 
   connect() {
@@ -19,6 +20,10 @@ class Connector {
       switch (type) {
         case 'joined': {
           this.handleJoined(payload);
+          break;
+        }
+        case 'peer joined': {
+          this.handlePeerJoined(payload);
           break;
         }
         case 'offer': {
@@ -52,74 +57,125 @@ class Connector {
     this.ws.send(JSON.stringify(data));
   }
 
+  getPeer(id) {
+    return this.store.getState().peers.get(id);
+  }
+
   handleJoined({ uuid }) {
-    this.actions.updateClient(uuid);
+    this.actions.setUser(uuid);
+  }
 
-    // Starting a WebRTC peer connection after joining room successfully
-
-    this.rtcPeerConn = new RTCPeerConnection({
+  async handlePeerJoined({ calleeId, userName }) {
+    const peerConn = new RTCPeerConnection({
       // Using Google public stun server
-      iceServers: [{ url: 'stun:stun2.1.google.com:19302' }],
+      iceServers: [{ urls: 'stun:stun2.1.google.com:19302' }],
     }, {
       optional: [{ RtpDataChannels: true }],
     });
 
-    this.rtcPeerConn.addEventListener('icecandidate', (evt) => {
-      if (evt.candidate) {
+    peerConn.addEventListener('icecandidate', ({ candidate }) => {
+      if (candidate) {
         this.send({
           type: 'candidate',
           payload: {
-            candidate: evt.candidate,
+            peerId: calleeId,
+            candidate,
           },
         });
       }
     });
 
-    this.rtcPeerConn.addEventListener('error', (err) => {
+    peerConn.addEventListener('addstream', ({ stream }) => {
+      this.actions.addPeerStream(calleeId, stream);
+    });
+
+    peerConn.addEventListener('error', (err) => {
       console.info(err);
     });
 
-    // when we receive a message from the other peer, display it on the screen
-    this.rtcPeerConn.addEventListener('message', (evt) => {
-      console.info(evt.data);
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
     });
 
-    this.rtcPeerConn.addEventListener('close', () => {
-      console.info('data channel is closed');
+    this.actions.addPeer(calleeId, userName, peerConn, stream);
+    peerConn.addStream(stream);
+
+    const offer = await peerConn.createOffer();
+    peerConn.setLocalDescription(offer);
+
+    this.send({
+      type: 'offer',
+      payload: {
+        calleeId,
+        offer,
+      },
     });
 
-    // Creating data channel
-    this.dataChannel = this.rtcPeerConn.createDataChannel('channel1', { reliable: true });
+    console.info(`Sent offer to ${calleeId}`);
   }
 
-  handleOffer({ uuid, offer }) {
-    console.info('Received offer: ', offer);
-    this.rtcPeerConn.setRemoteDescription(new RTCSessionDescription(offer));
+  async handleOffer({ callerId, userName, offer }) {
+    console.info(`Received offer from ${callerId}`);
+
+    const peerConn = new RTCPeerConnection({
+      // Using Google public stun server
+      iceServers: [{ urls: 'stun:stun2.1.google.com:19302' }],
+    }, {
+      optional: [{ RtpDataChannels: true }],
+    });
+
+    peerConn.addEventListener('icecandidate', ({ candidate }) => {
+      if (candidate) {
+        this.send({
+          type: 'candidate',
+          payload: {
+            peerId: callerId,
+            candidate,
+          },
+        });
+      }
+    });
+
+    peerConn.addEventListener('addstream', ({ stream }) => {
+      this.actions.addPeerStream(callerId, stream);
+    });
+
+    peerConn.addEventListener('error', (err) => {
+      console.info(err);
+    });
+
+    peerConn.setRemoteDescription(new RTCSessionDescription(offer));
 
     // Create an answer to an offer
-    this.rtcPeerConn.createAnswer().then((answer) => {
-      this.rtcPeerConn.setLocalDescription(answer);
-      this.send({
-        type: 'answer',
-        payload: {
-          uuid,
-          answer,
-        },
-      });
-      console.info('Sent answer: ', answer);
-    }).catch(() => {
-      console.info('Error when creating an answer');
+    const answer = await peerConn.createAnswer();
+
+    peerConn.setLocalDescription(answer);
+
+    this.actions.addPeer(callerId, userName, peerConn);
+
+    this.send({
+      type: 'answer',
+      payload: {
+        callerId,
+        answer,
+      },
     });
+
+    console.info(`Sent answer to ${callerId}`);
   }
 
-  handleAnswer({ answer }) {
-    console.info('Received answer: ', answer);
-    this.rtcPeerConn.setRemoteDescription(new RTCSessionDescription(answer));
+  handleAnswer({ calleeId, answer }) {
+    console.info(`Received answer from ${calleeId}`);
+    this.getPeer(calleeId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
   }
 
-  handleCandidate({ candidate }) {
-    console.info('Received candidate: ', candidate);
-    this.rtcPeerConn.addIceCandidate(new RTCIceCandidate(candidate));
+  handleCandidate({ peerId, candidate }) {
+    console.info(`Received candidate from ${peerId}`);
+    const peer = this.getPeer(peerId);
+    if (peer) {
+      this.getPeer(peerId).peerConn.addIceCandidate(new RTCIceCandidate(candidate));
+    }
   }
 
   handleMessage({ userName, message }) {
@@ -138,12 +194,9 @@ class Connector {
   }
 
   leaveRoom() {
-    if (this.rtcPeerConn) {
-      this.rtcPeerConn.close();
-      this.rtcPeerConn.onicecandidate = null;
-    }
-
-    this.actions.updateClient(undefined);
+    this.store.getState().peers.forEach((peer) => {
+      peer.peerConn.close();
+    });
   }
 
   sendMessage(message) {
@@ -153,21 +206,6 @@ class Connector {
       payload: {
         message,
       },
-    });
-  }
-
-  makeCall() {
-    this.rtcPeerConn.createOffer().then((offer) => {
-      this.send({
-        type: 'offer',
-        payload: {
-          offer,
-        },
-      });
-      console.info('Sent offer: ', offer);
-      this.rtcPeerConn.setLocalDescription(offer);
-    }).catch(() => {
-      console.info('Error when creating an offer');
     });
   }
 }

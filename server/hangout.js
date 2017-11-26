@@ -22,7 +22,7 @@ class Hangout {
         break;
       }
       case 'candidate': {
-        // this.onClientCandidate(wsClients, ws, data);
+        this.onClientCandidate(wsClients, ws, data);
         break;
       }
       case 'message': {
@@ -69,61 +69,81 @@ class Hangout {
         error: null,
       });
 
+      // New peer broadcasts 'peer joined' event to other clients in the same room.
+      for (let wsClient of wsClients) {
+        if (wsClient.roomName === ws.roomName && wsClient.uuid !== ws.uuid) {
+          this.send(wsClient, {
+            type: 'peer joined',
+            payload: {
+              calleeId: ws.uuid,
+              userName: wsClient.userName,
+            },
+            error: null,
+          });
+        }
+      }
+
       console.info(`[User] '${userName}' joined room '${roomName}'.`);
     }
   }
 
   onClientOffer(wsClients, ws, data) {
-    const { offer } = data.payload;
+    const { calleeId, offer } = data.payload;
 
     // Broadcast offer to other clients in the same room.
     for (let wsClient of wsClients) {
-      if (wsClient.roomName === ws.roomName && wsClient.uuid !== ws.uuid) {
-        console.info(`[Singaling] ${ws.userName} sending offer to: ${wsClient.userName}`);
+      if (wsClient.uuid === calleeId) {
         this.send(wsClient, {
           type: 'offer',
           payload: {
-            uuid: ws.uuid,
+            callerId: ws.uuid,
+            userName: ws.userName,
             offer,
           },
           error: null,
         });
+
+        console.info(`[Singaling] caller ${ws.userName} sending an offer to callee ${wsClient.userName}`);
       }
     }
   }
 
   onClientAnswer(wsClients, ws, data) {
-    const { answer, uuid } = data.payload;
+    const { callerId, answer } = data.payload;
 
     // Send answer to the target client
     for (let wsClient of wsClients) {
-      if (wsClient.uuid === uuid) {
-        console.info(`[Singaling] ${ws.userName} sending answer to: ${wsClient.userName}`);
+      if (wsClient.uuid === callerId) {
         this.send(wsClient, {
           type: 'answer',
           payload: {
+            calleeId: ws.uuid,
             answer,
           },
           error: null,
         });
+
+        console.info(`[Singaling] callee ${ws.userName} sending an answer to caller ${wsClient.userName}`);
       }
     }
   }
 
   onClientCandidate(wsClients, ws, data) {
-    const { candidate } = data.payload;
+    const { peerId, candidate } = data.payload;
 
     // Broadcast candidate to the target client
     for (let wsClient of wsClients) {
-      if (wsClient.uuid === uuid) {
-        console.info(`[Singaling] ${ws.userName} sending candidate to: ${wsClient.userName}`);
+      if (wsClient.uuid === peerId) {
         this.send(wsClient, {
           type: 'candidate',
           payload: {
+            peerId: ws.uuid,
             candidate,
           },
           error: null,
         });
+
+        console.info(`[Singaling] caller ${ws.userName} sending a candidate to callee ${wsClient.userName}`);
       }
     }
   }

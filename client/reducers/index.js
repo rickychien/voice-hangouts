@@ -1,15 +1,17 @@
 const initialState = {
   uuid: undefined,
   messages: [],
+  peers: new Map(),
 };
 
 let mid = 0;
 
 export default function (state = initialState, { type, payload }) {
   switch (type) {
-    case 'UPDATE_CLIENT':
+    case 'SET_USER': {
       return { ...state, ...{ uuid: payload.uuid } };
-    case 'ADD_MESSAGE':
+    }
+    case 'ADD_MESSAGE': {
       const { userName, message } = payload;
       mid += 1;
       return {
@@ -20,7 +22,19 @@ export default function (state = initialState, { type, payload }) {
           message,
         }],
       };
-    default:
+    }
+    case 'ADD_PEER': {
+      return { ...state, ...{ peers: new Map(state.peers.set(payload.uuid, payload)) } };
+    }
+    case 'ADD_PEER_STREAM': {
+      const peer = {
+        ...state.peers.get(payload.uuid),
+        stream: payload.stream,
+      };
+      return { ...state, ...{ peers: new Map(state.peers.set(payload.uuid, peer)) } };
+    }
+    default: {
       return state;
+    }
   }
 }
