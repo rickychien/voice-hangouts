@@ -5,16 +5,11 @@ import { connect } from 'react-redux';
 import styles from './App.css';
 
 class App extends React.PureComponent {
-  static defaultProps = {
-    uuid: undefined,
-    messages: [],
-  };
-
   static propTypes = {
     connector: PropTypes.object.isRequired,
-    uuid: PropTypes.string,
-    messages: PropTypes.array,
-    peers: PropTypes.object.isRequired,
+    clients: PropTypes.object.isRequired,
+    messages: PropTypes.array.isRequired,
+    uid: PropTypes.string.isRequired,
   };
 
   state = {
@@ -38,7 +33,7 @@ class App extends React.PureComponent {
   }
 
   onLeaveRoom = () => {
-    this.props.connector.leaveRoom(this.props.uuid);
+    this.props.connector.leaveRoom(this.props.uid);
   }
 
   onInputChange = (evt) => {
@@ -57,14 +52,14 @@ class App extends React.PureComponent {
   }
 
   render() {
-    const { uuid, messages, peers } = this.props;
+    const { uid, messages, clients } = this.props;
     const { message, roomName, userName } = this.state;
 
     return (
       <div className="app">
         <h1 className={ styles.appTitle }>Hangout</h1>
         {
-          !uuid ?
+          !uid ?
             <div className={ styles.app }>
               <h2 className={ styles.roomTitle }>Start a chatroom</h2>
               <input
@@ -111,12 +106,12 @@ class App extends React.PureComponent {
                 onKeyPress={ this.onSendMessage }
               />
               {
-                Array.from(peers).filter(([, peer]) => peer.stream).map(([id, peer]) => (
+                Array.from(clients).filter(([, peer]) => peer.stream).map(([id, peer]) => (
                   <video
                     key={ id }
                     autoPlay
                     className={ styles.video }
-                    src={ peer.stream ? URL.createObjectURL(peer.stream) : '' }
+                    src={ URL.createObjectURL(peer.stream) }
                   />
                 ))
               }
@@ -129,8 +124,8 @@ class App extends React.PureComponent {
 
 export default connect(
   (state) => ({
-    uuid: state.uuid,
+    clients: state.clients,
     messages: state.messages,
-    peers: state.peers,
+    uid: state.uid,
   }),
 )(App);

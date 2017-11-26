@@ -1,15 +1,26 @@
 const initialState = {
-  uuid: undefined,
+  clients: new Map(),
   messages: [],
-  peers: new Map(),
+  uid: '',
 };
 
 let mid = 0;
 
+function mergeClient(state = {
+  uid: '',
+  userName: undefined,
+  peerConn: undefined,
+  stream: undefined,
+}, newState) {
+  // Strip undefined properties
+  Object.keys(newState).forEach((key) => !newState[key] && delete newState[key]);
+  return { ...state, ...newState };
+}
+
 export default function (state = initialState, { type, payload }) {
   switch (type) {
     case 'SET_USER': {
-      return { ...state, ...{ uuid: payload.uuid } };
+      return { ...state, ...{ uid: payload.uid } };
     }
     case 'ADD_MESSAGE': {
       const { userName, message } = payload;
@@ -23,15 +34,13 @@ export default function (state = initialState, { type, payload }) {
         }],
       };
     }
-    case 'ADD_PEER': {
-      return { ...state, ...{ peers: new Map(state.peers.set(payload.uuid, payload)) } };
+    case 'SET_CLIENT': {
+      const client = mergeClient(state.clients.get(payload.uid), payload);
+      return { ...state, ...{ clients: new Map(state.clients.set(payload.uid, client)) } };
     }
-    case 'ADD_PEER_STREAM': {
-      const peer = {
-        ...state.peers.get(payload.uuid),
-        stream: payload.stream,
-      };
-      return { ...state, ...{ peers: new Map(state.peers.set(payload.uuid, peer)) } };
+    case 'DELETE_CLIENT': {
+      state.clients.delete(payload.uid);
+      return { ...state, ...{ clients: new Map(state.clients) } };
     }
     default: {
       return state;

@@ -9,9 +9,11 @@ rules:
   arrow-parens:
     - error
     - always
+  object-curly-newline: off
   function-paren-newline: off
   class-methods-use-this: off
   no-case-declarations: off
+  no-param-reassign: off
   global-require: off
   react/jsx-curly-spacing:
     - error

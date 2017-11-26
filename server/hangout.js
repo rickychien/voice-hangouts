@@ -52,30 +52,32 @@ class Hangout {
 
       console.info(`[User] '${userName}' has been rejected due to same user existed.`);
     } else {
-      // Generate unique id for the new client
-      const uuid = uuidv4();
+      // Generate unique user id for the new client
+      const uid = uuidv4();
 
       // Store the client
-      ws.uuid = uuid;
+      ws.uid = uid;
       ws.userName = userName;
       ws.roomName = roomName;
 
-      // Send vaild uuid back to client
+      // Send vaild uid back to client
       this.send(ws, {
         type: 'joined',
         payload: {
-          uuid,
+          uid,
+          userName,
+          roomName,
         },
         error: null,
       });
 
       // New peer broadcasts 'peer joined' event to other clients in the same room.
       for (let wsClient of wsClients) {
-        if (wsClient.roomName === ws.roomName && wsClient.uuid !== ws.uuid) {
+        if (wsClient.roomName === ws.roomName && wsClient.uid !== ws.uid) {
           this.send(wsClient, {
             type: 'peer joined',
             payload: {
-              calleeId: ws.uuid,
+              calleeId: ws.uid,
               userName: wsClient.userName,
             },
             error: null,
@@ -90,20 +92,20 @@ class Hangout {
   onClientOffer(wsClients, ws, data) {
     const { calleeId, offer } = data.payload;
 
-    // Broadcast offer to other clients in the same room.
+    // Send offer to the peer client
     for (let wsClient of wsClients) {
-      if (wsClient.uuid === calleeId) {
+      if (wsClient.uid === calleeId) {
         this.send(wsClient, {
           type: 'offer',
           payload: {
-            callerId: ws.uuid,
+            callerId: ws.uid,
             userName: ws.userName,
             offer,
           },
           error: null,
         });
 
-        console.info(`[Singaling] caller ${ws.userName} sending an offer to callee ${wsClient.userName}`);
+        console.info(`[Signaling] caller ${ws.userName} sending an offer to callee ${wsClient.userName}`);
       }
     }
   }
@@ -111,19 +113,19 @@ class Hangout {
   onClientAnswer(wsClients, ws, data) {
     const { callerId, answer } = data.payload;
 
-    // Send answer to the target client
+    // Send answer to the peer client
     for (let wsClient of wsClients) {
-      if (wsClient.uuid === callerId) {
+      if (wsClient.uid === callerId) {
         this.send(wsClient, {
           type: 'answer',
           payload: {
-            calleeId: ws.uuid,
+            calleeId: ws.uid,
             answer,
           },
           error: null,
         });
 
-        console.info(`[Singaling] callee ${ws.userName} sending an answer to caller ${wsClient.userName}`);
+        console.info(`[Signaling] callee ${ws.userName} sending an answer to caller ${wsClient.userName}`);
       }
     }
   }
@@ -131,19 +133,19 @@ class Hangout {
   onClientCandidate(wsClients, ws, data) {
     const { peerId, candidate } = data.payload;
 
-    // Broadcast candidate to the target client
+    // Send candidate to the peer client
     for (let wsClient of wsClients) {
-      if (wsClient.uuid === peerId) {
+      if (wsClient.uid === peerId) {
         this.send(wsClient, {
           type: 'candidate',
           payload: {
-            peerId: ws.uuid,
+            peerId: ws.uid,
             candidate,
           },
           error: null,
         });
 
-        console.info(`[Singaling] caller ${ws.userName} sending a candidate to callee ${wsClient.userName}`);
+        console.info(`[Signaling] caller ${ws.userName} sending a candidate to callee ${wsClient.userName}`);
       }
     }
   }
@@ -168,6 +170,19 @@ class Hangout {
 
   onClientLeave(wsClients, ws) {
     console.info(`[User] '${ws.userName}' left room '${ws.roomName}'.`);
+
+    // Broadcast 'peer left' event to all clients in the same room.
+    for (let wsClient of wsClients) {
+      if (wsClient.roomName === ws.roomName && wsClient.uid !== ws.uid) {
+        this.send(wsClient, {
+          type: 'peer left',
+          payload: {
+            uid: ws.uid,
+          },
+          error: null,
+        });
+      }
+    }
   }
 }
 

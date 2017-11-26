@@ -8,11 +8,11 @@ export function addMessage(userName, message) {
   };
 }
 
-export function addPeer(uuid, userName, peerConn, stream) {
+export function setClient({ uid, userName, peerConn, stream }) {
   return {
-    type: 'ADD_PEER',
+    type: 'SET_CLIENT',
     payload: {
-      uuid,
+      uid,
       userName,
       peerConn,
       stream,
@@ -20,28 +20,28 @@ export function addPeer(uuid, userName, peerConn, stream) {
   };
 }
 
-export function addPeerStream(uuid, stream) {
+export function deleteClient(uid) {
   return {
-    type: 'ADD_PEER_STREAM',
+    type: 'DELETE_CLIENT',
     payload: {
-      uuid,
-      stream,
+      uid,
     },
   };
 }
 
-export function setUser(uuid) {
+
+export function setUser(uid) {
   return {
     type: 'SET_USER',
     payload: {
-      uuid,
+      uid,
     },
   };
 }
 
 export default {
   addMessage,
-  addPeer,
-  addPeerStream,
+  setClient,
+  deleteClient,
   setUser,
 };

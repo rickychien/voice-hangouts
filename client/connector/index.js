@@ -26,6 +26,10 @@ class Connector {
           this.handlePeerJoined(payload);
           break;
         }
+        case 'peer left': {
+          this.handlePeerLeft(payload);
+          break;
+        }
         case 'offer': {
           this.handleOffer(payload);
           break;
@@ -57,12 +61,13 @@ class Connector {
     this.ws.send(JSON.stringify(data));
   }
 
-  getPeer(id) {
-    return this.store.getState().peers.get(id);
+  getClient(id) {
+    return this.store.getState().clients.get(id);
   }
 
-  handleJoined({ uuid }) {
-    this.actions.setUser(uuid);
+  async handleJoined({ uid, userName }) {
+    this.actions.setUser(uid);
+    this.actions.setClient({ uid, userName });
   }
 
   async handlePeerJoined({ calleeId, userName }) {
@@ -86,19 +91,29 @@ class Connector {
     });
 
     peerConn.addEventListener('addstream', ({ stream }) => {
-      this.actions.addPeerStream(calleeId, stream);
+      console.info(`Caller received stream from callee ${calleeId}`);
+      // Update peer's stream
+      this.actions.setClient({ uid: calleeId, stream });
     });
 
     peerConn.addEventListener('error', (err) => {
       console.info(err);
     });
 
+    // Create self-view stream
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
 
-    this.actions.addPeer(calleeId, userName, peerConn, stream);
+    // Update client stream to local client list
+    const { uid } = this.store.getState();
+    this.actions.setClient({ uid, stream });
+
+    // Update peer before peer's stream arrival
+    this.actions.setClient({ uid: calleeId, userName, peerConn });
+
+    // Start sending client's self-view stream to peer
     peerConn.addStream(stream);
 
     const offer = await peerConn.createOffer();
@@ -138,7 +153,9 @@ class Connector {
     });
 
     peerConn.addEventListener('addstream', ({ stream }) => {
-      this.actions.addPeerStream(callerId, stream);
+      console.info(`Callee received stream from caller ${callerId}`);
+      // Update peer's stream
+      this.actions.setClient({ uid: callerId, stream });
     });
 
     peerConn.addEventListener('error', (err) => {
@@ -147,12 +164,26 @@ class Connector {
 
     peerConn.setRemoteDescription(new RTCSessionDescription(offer));
 
+    // Create self-view stream
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    // Update stream to client itself
+    const { uid } = this.store.getState();
+    this.actions.setClient({ uid, stream });
+
+    // Update peer before peer's stream arrival
+    this.actions.setClient({ uid: callerId, userName, peerConn });
+
+    // Start sending client's self-view stream to peer
+    peerConn.addStream(stream);
+
     // Create an answer to an offer
     const answer = await peerConn.createAnswer();
 
     peerConn.setLocalDescription(answer);
-
-    this.actions.addPeer(callerId, userName, peerConn);
 
     this.send({
       type: 'answer',
@@ -167,19 +198,24 @@ class Connector {
 
   handleAnswer({ calleeId, answer }) {
     console.info(`Received answer from ${calleeId}`);
-    this.getPeer(calleeId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
+    this.getClient(calleeId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
   }
 
   handleCandidate({ peerId, candidate }) {
     console.info(`Received candidate from ${peerId}`);
-    const peer = this.getPeer(peerId);
-    if (peer) {
-      this.getPeer(peerId).peerConn.addIceCandidate(new RTCIceCandidate(candidate));
+    const client = this.getClient(peerId);
+    if (client && client.peerConn) {
+      client.peerConn.addIceCandidate(new RTCIceCandidate(candidate));
     }
   }
 
   handleMessage({ userName, message }) {
     this.actions.addMessage(userName, message);
+  }
+
+  handlePeerLeft({ uid }) {
+    console.log(`Peer ${uid} has left`);
+    this.actions.deleteClient(uid);
   }
 
   joinRoom(roomName, userName) {
@@ -196,6 +232,13 @@ class Connector {
   leaveRoom() {
     this.store.getState().peers.forEach((peer) => {
       peer.peerConn.close();
+    });
+
+    this.send({
+      type: 'leave',
+      payload: {
+        uid: this.store.getState().uid,
+      },
     });
   }
 
