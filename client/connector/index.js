@@ -230,15 +230,15 @@ class Connector {
   }
 
   leaveRoom() {
-    this.store.getState().peers.forEach((peer) => {
-      peer.peerConn.close();
-    });
-
     this.send({
       type: 'leave',
       payload: {
         uid: this.store.getState().uid,
       },
+    });
+
+    this.store.getState().peers.forEach((peer) => {
+      peer.peerConn.close();
     });
   }
 
