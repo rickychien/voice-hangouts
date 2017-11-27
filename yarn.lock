@@ -3986,6 +3986,12 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^2.0.0"
     inherits "^2.0.1"
 
+rtcpeerconnection-shim@^1.1.13:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/rtcpeerconnection-shim/-/rtcpeerconnection-shim-1.2.1.tgz#c9cb37845c3c9273731e873172d0329ef85c8546"
+  dependencies:
+    sdp "^2.2.0"
+
 run-async@^2.2.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/run-async/-/run-async-2.3.0.tgz#0371ab4ae0bdd720d4166d7dfda64ff7a445a6c0"
@@ -4019,6 +4025,10 @@ schema-utils@^0.3.0:
   resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-0.3.0.tgz#f5877222ce3e931edae039f17eb3716e7137f8cf"
   dependencies:
     ajv "^5.0.0"
+
+sdp@^2.2.0, sdp@^2.3.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/sdp/-/sdp-2.5.0.tgz#b15a0b1dfd0a38f6a8c780e58f8c8fe73c29ffe5"
 
 "semver@2 || 3 || 4 || 5", semver@^5.3.0:
   version "5.4.1"
@@ -4548,6 +4558,13 @@ webpack@^3.8.1:
     watchpack "^1.4.0"
     webpack-sources "^1.0.1"
     yargs "^8.0.2"
+
+webrtc-adapter@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/webrtc-adapter/-/webrtc-adapter-6.0.2.tgz#765f99c163e46046a758fec457f7859c90a19487"
+  dependencies:
+    rtcpeerconnection-shim "^1.1.13"
+    sdp "^2.3.0"
 
 whatwg-fetch@>=0.10.0:
   version "2.0.3"

@@ -1,191 +1,97 @@
 const uuidv4 = require('uuid/v4');
 
 class Hangout {
+  constructor(wsClients) {
+    this.wsClients = wsClients;
+  }
+
   send(ws, data) {
     ws.send(JSON.stringify(data));
   }
 
-  onMessage(wsClients, ws, message) {
-    const { type, ...data } = JSON.parse(message);
+  sendToPeer(type, ws, payload) {
+    const { peerId } = payload;
 
-    switch (type) {
-      case 'join': {
-        this.onClientJoin(wsClients, ws, data);
-        break;
-      }
-      case 'offer': {
-        this.onClientOffer(wsClients, ws, data);
-        break;
-      }
-      case 'answer': {
-        this.onClientAnswer(wsClients, ws, data);
-        break;
-      }
-      case 'candidate': {
-        this.onClientCandidate(wsClients, ws, data);
-        break;
-      }
-      case 'message': {
-        this.onClientMessage(wsClients, ws, data);
-        break;
-      }
-      case 'leave': {
-        this.onClientLeave(wsClients, ws, data);
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-  }
-
-  onClientJoin(wsClients, ws, data) {
-    const { roomName, userName } = data.payload;
-
-    if (wsClients.has(userName)) {
-      // Reject client if username has been used.
-      this.send(ws, {
-        type: 'join',
-        payload: {},
-        error: `Username ${userName} has been used`,
-      });
-
-      console.info(`[User] '${userName}' has been rejected due to same user existed.`);
-    } else {
-      // Generate unique user id for the new client
-      const uid = uuidv4();
-
-      // Store the client
-      ws.uid = uid;
-      ws.userName = userName;
-      ws.roomName = roomName;
-
-      // Send vaild uid back to client
-      this.send(ws, {
-        type: 'joined',
-        payload: {
-          uid,
-          userName,
-          roomName,
-        },
-        error: null,
-      });
-
-      // New peer broadcasts 'peer joined' event to other clients in the same room.
-      for (let wsClient of wsClients) {
-        if (wsClient.roomName === ws.roomName && wsClient.uid !== ws.uid) {
-          this.send(wsClient, {
-            type: 'peer joined',
-            payload: {
-              peerId: ws.uid,
-              userName: ws.userName,
-            },
-            error: null,
-          });
-        }
-      }
-
-      console.info(`[User] '${userName}' joined room '${roomName}'.`);
-    }
-  }
-
-  onClientOffer(wsClients, ws, data) {
-    const { peerId, offer } = data.payload;
-
-    // Send offer to the peer client
-    for (let wsClient of wsClients) {
+    for (let wsClient of this.wsClients) {
       if (wsClient.uid === peerId) {
         this.send(wsClient, {
-          type: 'offer',
+          type,
           payload: {
             peerId: ws.uid,
             userName: ws.userName,
-            offer,
+            [type]: payload[type],
           },
-          error: null,
         });
 
-        console.info(`[Signaling] '${ws.userName}'sending an offer to '${wsClient.userName}'`);
+        console.info(`[Send] '${ws.userName}' sent '${type}' to user '${wsClient.userName}'`);
       }
     }
   }
 
-  onClientAnswer(wsClients, ws, data) {
-    const { peerId, answer } = data.payload;
-
-    // Send answer to the peer client
-    for (let wsClient of wsClients) {
-      if (wsClient.uid === peerId) {
-        this.send(wsClient, {
-          type: 'answer',
-          payload: {
-            peerId: ws.uid,
-            userName: ws.userName,
-            answer,
-          },
-          error: null,
-        });
-
-        console.info(`[Signaling] '${ws.userName}' sending an answer to '${wsClient.userName}'`);
-      }
-    }
-  }
-
-  onClientCandidate(wsClients, ws, data) {
-    const { peerId, candidate } = data.payload;
-
-    // Send candidate to the peer client
-    for (let wsClient of wsClients) {
-      if (wsClient.uid === peerId) {
-        this.send(wsClient, {
-          type: 'candidate',
-          payload: {
-            peerId: ws.uid,
-            userName: ws.userName,
-            candidate,
-          },
-          error: null,
-        });
-
-        console.info(`[Signaling] '${ws.userName}'sending a candidate to '${wsClient.userName}'`);
-      }
-    }
-  }
-
-  onClientMessage(wsClients, ws, data) {
-    const { message } = data.payload;
-
-    // Broadcast message to all clients in the same room.
-    for (let wsClient of wsClients) {
-      if (wsClient.roomName === ws.roomName) {
-        this.send(wsClient, {
-          type: 'message',
-          payload: {
-            userName: ws.userName,
-            message,
-          },
-          error: null,
-        });
-      }
-    }
-  }
-
-  onClientLeave(wsClients, ws) {
-    console.info(`[User] '${ws.userName}' left room '${ws.roomName}'.`);
-
-    // Broadcast 'peer left' event to all clients in the same room.
-    for (let wsClient of wsClients) {
+  broadcastToRoomPeers(type, ws, payload) {
+    for (let wsClient of this.wsClients) {
       if (wsClient.roomName === ws.roomName && wsClient.uid !== ws.uid) {
         this.send(wsClient, {
-          type: 'peer left',
+          type,
           payload: {
-            uid: ws.uid,
+            peerId: ws.uid,
             userName: ws.userName,
+            ...payload,
           },
-          error: null,
         });
       }
     }
+
+    console.info(`[Broadcast] '${ws.userName}' broadcasted '${type}' to all peers in room '${ws.roomName}'.`);
+  }
+
+  onMessage(ws, message) {
+    const { type, payload } = JSON.parse(message);
+    this[`onClient${type[0].toUpperCase() + type.slice(1)}`](ws, payload);
+  }
+
+  onClientJoin(ws, payload) {
+    const { roomName, userName } = payload;
+
+    // Generate unique user id for the new client
+    const uid = uuidv4();
+
+    // Store the client
+    ws.uid = uid;
+    ws.userName = userName;
+    ws.roomName = roomName;
+
+    // Send vaild uid back to client
+    this.send(ws, {
+      type: 'joined',
+      payload: {
+        uid,
+        userName,
+        roomName,
+      },
+    });
+
+    this.broadcastToRoomPeers('peer joined', ws);
+  }
+
+  onClientOffer(ws, payload) {
+    this.sendToPeer('offer', ws, payload);
+  }
+
+  onClientAnswer(ws, payload) {
+    this.sendToPeer('answer', ws, payload);
+  }
+
+  onClientCandidate(ws, payload) {
+    this.sendToPeer('candidate', ws, payload);
+  }
+
+  onClientMessage(ws, payload) {
+    this.broadcastToRoomPeers('message', ws, payload);
+  }
+
+  onClientLeave(ws) {
+    this.broadcastToRoomPeers('peer left', ws);
   }
 }
 

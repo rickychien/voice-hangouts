@@ -2,6 +2,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
 
+import Actions from '../../actions';
+
 import styles from './App.css';
 
 class App extends React.PureComponent {
@@ -10,6 +12,7 @@ class App extends React.PureComponent {
     clients: PropTypes.object.isRequired,
     messages: PropTypes.array.isRequired,
     uid: PropTypes.string.isRequired,
+    addMessage: PropTypes.func.isRequired,
   };
 
   state = {
@@ -44,9 +47,11 @@ class App extends React.PureComponent {
   onSendMessage = (evt) => {
     const { key } = evt;
     const { message } = this.state;
+    const { addMessage, clients, connector, uid } = this.props;
 
     if (key === 'Enter' && message) {
-      this.props.connector.sendMessage(message);
+      addMessage(clients.get(uid).userName, message);
+      connector.sendMessage(message);
       this.setState({ message: '' });
     }
   }
@@ -111,7 +116,7 @@ class App extends React.PureComponent {
                     key={ id }
                     autoPlay
                     className={ styles.video }
-                    src={ URL.createObjectURL(peer.stream) }
+                    src={ peer.stream }
                   />
                 ))
               }
@@ -127,5 +132,8 @@ export default connect(
     clients: state.clients,
     messages: state.messages,
     uid: state.uid,
+  }),
+  (dispatch) => ({
+    addMessage: (userName, message) => dispatch(Actions.addMessage(userName, message)),
   }),
 )(App);

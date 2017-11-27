@@ -9,6 +9,10 @@ export function addMessage(userName, message) {
 }
 
 export function setClient({ uid, userName, peerConn, stream }) {
+  if (stream) {
+    stream = URL.createObjectURL(stream);
+  }
+
   return {
     type: 'SET_CLIENT',
     payload: {

@@ -1,3 +1,5 @@
+import to from '../utils/to';
+
 class Connector {
   constructor(url, actions, store) {
     this.ws = new WebSocket(url);
@@ -11,11 +13,7 @@ class Connector {
     });
 
     this.ws.addEventListener('message', ({ data }) => {
-      const { type, error, payload } = JSON.parse(data);
-
-      if (error) {
-        throw error;
-      }
+      const { type, payload } = JSON.parse(data);
 
       switch (type) {
         case 'joined': {
@@ -65,50 +63,14 @@ class Connector {
     return this.store.getState().clients.get(id);
   }
 
-  async createPeerConnection(peerId, userName, type) {
+  getPeerConnection(peerId, userName) {
     const peerConn = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun2.1.google.com:19302' }],
-    }, {
-      optional: [{ RtpDataChannels: true }],
-    });
-
-    peerConn.addEventListener('negotiationneeded', async () => {
-      switch (type) {
-        case 'offer': {
-          const offer = await peerConn.createOffer();
-          await peerConn.setLocalDescription(offer);
-
-          this.send({
-            type: 'offer',
-            payload: {
-              peerId,
-              offer,
-            },
-          });
-
-          console.info(`Sent offer to ${userName} (${peerId})`);
-          break;
-        }
-        case 'answer': {
-          const answer = await peerConn.createAnswer();
-          await peerConn.setLocalDescription(answer);
-
-          this.send({
-            type: 'answer',
-            payload: {
-              peerId,
-              answer,
-            },
-          });
-
-          console.info(`Sent answer to ${userName} (${peerId})`);
-          break;
-        }
-        default: {
-          break;
-        }
+      iceServers: [{
+        urls: [
+          "stun:stun.l.google.com:19302",
+        ]
       }
-    });
+    ]});
 
     peerConn.addEventListener('icecandidate', ({ candidate }) => {
       if (candidate) {
@@ -120,84 +82,139 @@ class Connector {
           },
         });
 
-        console.info(`Sent icecandidate to ${userName} (${peerId})`);
+        console.info(`Sent candidate to ${userName} (${peerId})`);
       }
     });
 
-    peerConn.addEventListener('addstream', ({ stream }) => {
+    peerConn.addEventListener('track', ({ streams }) => {
       // Update peer's stream
-      this.actions.setClient({ uid: peerId, stream });
+      this.actions.setClient({ uid: peerId, stream: streams[0] });
 
       console.info(`Received remote stream from ${userName} (${peerId})`);
     });
 
-    peerConn.addEventListener('error', (err) => {
-      console.info(err);
+    peerConn.addEventListener('error', (error) => {
+      console.info(error);
     });
 
-    // Start sending client's self-view stream to peer
-    const stream = await this.createSelfViewStream();
-    peerConn.addStream(stream);
+    console.info(`Sent local stream to ${userName} (${peerId})`);
 
-    // Update peer before peer's stream arrival
-    this.actions.setClient({ uid: peerId, userName, peerConn, stream });
+    // Store peer before peer's stream arrival
+    this.actions.setClient({ uid: peerId, userName, peerConn });
 
     return peerConn;
   }
 
-  async createSelfViewStream() {
-    // Create self-view stream
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
+  getSelfViewStream(fake) {
+    if (this.stream) {
+      return this.stream;
+    }
+
+    // Create self-view stream if it doesn't exist
+    this.stream = navigator.mediaDevices.getUserMedia({
       video: true,
+      fake,
     });
 
-    // Update stream to client itself
-    const { uid } = this.store.getState();
-    this.actions.setClient({ uid, stream });
-
-    return stream;
+    return this.stream;
   }
 
   async handleJoined({ uid, userName }) {
     this.actions.setUser(uid);
-    this.actions.setClient({ uid, userName });
+    // Start sending client's self-view stream to peer
+    const stream = await this.getSelfViewStream(userName === 'bob');
+    this.actions.setClient({ uid, userName, stream });
+    console.info('Set self stream on screen');
   }
 
   async handlePeerJoined({ peerId, userName }) {
+    const peerConn = this.getPeerConnection(peerId, userName);
+
+    peerConn.addEventListener('negotiationneeded', async () => {
+      let err, offer;
+
+      [err, offer] = await to(peerConn.createOffer());
+      if (err) console.error(err);
+
+      [err] = await to(peerConn.setLocalDescription(offer));
+      if (err) console.error(err);
+
+      this.send({
+        type: 'offer',
+        payload: {
+          peerId,
+          offer,
+        },
+      });
+
+      console.info(`Sent offer to ${userName} (${peerId})`);
+    });
+
+    const [err, stream] = await to(this.getSelfViewStream(userName === 'bob'));
+    if (err) console.error(err);
+
+    stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
+
     console.info(`New peer ${userName} (${peerId}) joined`);
-    await this.createPeerConnection(peerId, userName, 'offer');
   }
 
   async handleOffer({ peerId, userName, offer }) {
+    let err, answer, stream;
+    const peerConn = this.getPeerConnection(peerId, userName);
+
+    [err, stream] = await to(this.getSelfViewStream(userName === 'bob'));
+    if (err) console.error(err);
+
+    stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
+
     console.info(`Received offer from ${userName} (${peerId})`);
 
-    const peerConn = await this.createPeerConnection(peerId, userName, 'answer');
-    await peerConn.setRemoteDescription(new RTCSessionDescription(offer));
+    [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(offer)));
+    if (err) console.error(err);
+
+    [err, answer] = await to(peerConn.createAnswer());
+    if (err) console.error(err);
+
+    [err] = await to(peerConn.setLocalDescription(answer));
+    if (err) console.error(err);
+
+    this.send({
+      type: 'answer',
+      payload: {
+        peerId,
+        answer,
+      },
+    });
+
+    console.info(`Sent answer to ${userName} (${peerId})`);
   }
 
   async handleAnswer({ peerId, userName, answer }) {
-    console.info(`Received answer from ${userName} (${peerId})`);
+    const peerConn = this.getClient(peerId).peerConn;
+    const [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(answer)));
+    if (err) console.error(err);
 
-    await this.getClient(peerId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
+    console.info(`Received answer from ${userName} (${peerId})`);
   }
 
   async handleCandidate({ peerId, userName, candidate }) {
-    console.info(`Received candidate from ${userName} (${peerId})`);
-
     const client = this.getClient(peerId);
-    if (client && client.peerConn) {
-      await client.peerConn.addIceCandidate(new RTCIceCandidate(candidate));
+
+    if (client && client.peerConn && client.peerConn.remoteDescription && client.peerConn.remoteDescription.type) {
+      const [err] = await to(client.peerConn.addIceCandidate(new RTCIceCandidate(candidate)));
+      if (err) console.error(err);
     }
+
+    console.info(`Received candidate from ${userName} (${peerId})`);
   }
 
   handleMessage({ userName, message }) {
     this.actions.addMessage(userName, message);
   }
 
-  handlePeerLeft({ uid, userName }) {
-    console.log(`Peer ${userName} (${uid}) has left`);
-    this.actions.deleteClient(uid);
+  handlePeerLeft({ peerId, userName }) {
+    console.log(`Peer ${userName} (${peerId}) has left`);
+    this.actions.deleteClient(peerId);
   }
 
   joinRoom(roomName, userName) {

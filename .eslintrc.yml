@@ -23,6 +23,7 @@ rules:
   jsx-a11y/media-has-caption: off
   import/no-extraneous-dependencies: [error, { devDependencies: true }]
   import/prefer-default-export: off
+  import/no-named-as-default-member: off
 env:
   browser: true
   mocha: true

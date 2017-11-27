@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { bindActionCreators } from 'redux';
 import { Provider } from 'react-redux';
+import 'webrtc-adapter';
 
 import Actions from './actions';
 import configureStore from './store';
