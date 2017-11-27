@@ -65,17 +65,49 @@ class Connector {
     return this.store.getState().clients.get(id);
   }
 
-  async handleJoined({ uid, userName }) {
-    this.actions.setUser(uid);
-    this.actions.setClient({ uid, userName });
-  }
-
-  async handlePeerJoined({ calleeId, userName }) {
+  async createPeerConnection(peerId, userName, type) {
     const peerConn = new RTCPeerConnection({
-      // Using Google public stun server
       iceServers: [{ urls: 'stun:stun2.1.google.com:19302' }],
     }, {
       optional: [{ RtpDataChannels: true }],
+    });
+
+    peerConn.addEventListener('negotiationneeded', async () => {
+      switch (type) {
+        case 'offer': {
+          const offer = await peerConn.createOffer();
+          await peerConn.setLocalDescription(offer);
+
+          this.send({
+            type: 'offer',
+            payload: {
+              calleeId: peerId,
+              offer,
+            },
+          });
+
+          console.info(`Sent offer to ${peerId}`);
+          break;
+        }
+        case 'answer': {
+          const answer = await peerConn.createAnswer();
+          await peerConn.setLocalDescription(answer);
+
+          this.send({
+            type: 'answer',
+            payload: {
+              callerId: peerId,
+              answer,
+            },
+          });
+
+          console.info(`Sent answer to ${peerId}`);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
     });
 
     peerConn.addEventListener('icecandidate', ({ candidate }) => {
@@ -83,87 +115,37 @@ class Connector {
         this.send({
           type: 'candidate',
           payload: {
-            peerId: calleeId,
+            peerId,
             candidate,
           },
         });
+
+        console.info(`Sent icecandidate to ${peerId}`);
       }
     });
 
     peerConn.addEventListener('addstream', ({ stream }) => {
-      console.info(`Caller received stream from callee ${calleeId}`);
       // Update peer's stream
-      this.actions.setClient({ uid: calleeId, stream });
+      this.actions.setClient({ uid: peerId, stream });
+
+      console.info(`Received remote stream from ${peerId}`);
     });
 
     peerConn.addEventListener('error', (err) => {
       console.info(err);
     });
-
-    // Create self-view stream
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-
-    // Update client stream to local client list
-    const { uid } = this.store.getState();
-    this.actions.setClient({ uid, stream });
-
-    // Update peer before peer's stream arrival
-    this.actions.setClient({ uid: calleeId, userName, peerConn });
 
     // Start sending client's self-view stream to peer
+    const stream = await this.createSelfViewStream();
     peerConn.addStream(stream);
 
-    const offer = await peerConn.createOffer();
-    peerConn.setLocalDescription(offer);
+    // Update peer before peer's stream arrival
+    this.actions.setClient({ uid: peerId, userName, peerConn, stream });
 
-    this.send({
-      type: 'offer',
-      payload: {
-        calleeId,
-        offer,
-      },
-    });
-
-    console.info(`Sent offer to ${calleeId}`);
+    return peerConn;
   }
 
-  async handleOffer({ callerId, userName, offer }) {
-    console.info(`Received offer from ${callerId}`);
-
-    const peerConn = new RTCPeerConnection({
-      // Using Google public stun server
-      iceServers: [{ urls: 'stun:stun2.1.google.com:19302' }],
-    }, {
-      optional: [{ RtpDataChannels: true }],
-    });
-
-    peerConn.addEventListener('icecandidate', ({ candidate }) => {
-      if (candidate) {
-        this.send({
-          type: 'candidate',
-          payload: {
-            peerId: callerId,
-            candidate,
-          },
-        });
-      }
-    });
-
-    peerConn.addEventListener('addstream', ({ stream }) => {
-      console.info(`Callee received stream from caller ${callerId}`);
-      // Update peer's stream
-      this.actions.setClient({ uid: callerId, stream });
-    });
-
-    peerConn.addEventListener('error', (err) => {
-      console.info(err);
-    });
-
-    peerConn.setRemoteDescription(new RTCSessionDescription(offer));
-
+  async createSelfViewStream() {
     // Create self-view stream
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -174,38 +156,37 @@ class Connector {
     const { uid } = this.store.getState();
     this.actions.setClient({ uid, stream });
 
-    // Update peer before peer's stream arrival
-    this.actions.setClient({ uid: callerId, userName, peerConn });
-
-    // Start sending client's self-view stream to peer
-    peerConn.addStream(stream);
-
-    // Create an answer to an offer
-    const answer = await peerConn.createAnswer();
-
-    peerConn.setLocalDescription(answer);
-
-    this.send({
-      type: 'answer',
-      payload: {
-        callerId,
-        answer,
-      },
-    });
-
-    console.info(`Sent answer to ${callerId}`);
+    return stream;
   }
 
-  handleAnswer({ calleeId, answer }) {
+  async handleJoined({ uid, userName }) {
+    this.actions.setUser(uid);
+    this.actions.setClient({ uid, userName });
+  }
+
+  async handlePeerJoined({ calleeId, userName }) {
+    await this.createPeerConnection(calleeId, userName, 'offer');
+  }
+
+  async handleOffer({ callerId, userName, offer }) {
+    console.info(`Received offer from ${callerId}`);
+
+    const peerConn = await this.createPeerConnection(callerId, userName, 'answer');
+    await peerConn.setRemoteDescription(new RTCSessionDescription(offer));
+  }
+
+  async handleAnswer({ calleeId, answer }) {
     console.info(`Received answer from ${calleeId}`);
-    this.getClient(calleeId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
+
+    await this.getClient(calleeId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
   }
 
-  handleCandidate({ peerId, candidate }) {
+  async handleCandidate({ peerId, candidate }) {
     console.info(`Received candidate from ${peerId}`);
+
     const client = this.getClient(peerId);
     if (client && client.peerConn) {
-      client.peerConn.addIceCandidate(new RTCIceCandidate(candidate));
+      await client.peerConn.addIceCandidate(new RTCIceCandidate(candidate));
     }
   }
 
@@ -237,8 +218,10 @@ class Connector {
       },
     });
 
-    this.store.getState().peers.forEach((peer) => {
-      peer.peerConn.close();
+    this.store.getState().clients.forEach((client) => {
+      if (client.peerConn) {
+        client.peerConn.close();
+      }
     });
   }
 
