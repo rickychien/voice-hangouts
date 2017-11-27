@@ -77,8 +77,8 @@ class Hangout {
           this.send(wsClient, {
             type: 'peer joined',
             payload: {
-              calleeId: ws.uid,
-              userName: wsClient.userName,
+              peerId: ws.uid,
+              userName: ws.userName,
             },
             error: null,
           });
@@ -90,42 +90,43 @@ class Hangout {
   }
 
   onClientOffer(wsClients, ws, data) {
-    const { calleeId, offer } = data.payload;
+    const { peerId, offer } = data.payload;
 
     // Send offer to the peer client
     for (let wsClient of wsClients) {
-      if (wsClient.uid === calleeId) {
+      if (wsClient.uid === peerId) {
         this.send(wsClient, {
           type: 'offer',
           payload: {
-            callerId: ws.uid,
+            peerId: ws.uid,
             userName: ws.userName,
             offer,
           },
           error: null,
         });
 
-        console.info(`[Signaling] caller ${ws.userName} sending an offer to callee ${wsClient.userName}`);
+        console.info(`[Signaling] '${ws.userName}'sending an offer to '${wsClient.userName}'`);
       }
     }
   }
 
   onClientAnswer(wsClients, ws, data) {
-    const { callerId, answer } = data.payload;
+    const { peerId, answer } = data.payload;
 
     // Send answer to the peer client
     for (let wsClient of wsClients) {
-      if (wsClient.uid === callerId) {
+      if (wsClient.uid === peerId) {
         this.send(wsClient, {
           type: 'answer',
           payload: {
-            calleeId: ws.uid,
+            peerId: ws.uid,
+            userName: ws.userName,
             answer,
           },
           error: null,
         });
 
-        console.info(`[Signaling] callee ${ws.userName} sending an answer to caller ${wsClient.userName}`);
+        console.info(`[Signaling] '${ws.userName}' sending an answer to '${wsClient.userName}'`);
       }
     }
   }
@@ -140,12 +141,13 @@ class Hangout {
           type: 'candidate',
           payload: {
             peerId: ws.uid,
+            userName: ws.userName,
             candidate,
           },
           error: null,
         });
 
-        console.info(`[Signaling] caller ${ws.userName} sending a candidate to callee ${wsClient.userName}`);
+        console.info(`[Signaling] '${ws.userName}'sending a candidate to '${wsClient.userName}'`);
       }
     }
   }
@@ -178,6 +180,7 @@ class Hangout {
           type: 'peer left',
           payload: {
             uid: ws.uid,
+            userName: ws.userName,
           },
           error: null,
         });

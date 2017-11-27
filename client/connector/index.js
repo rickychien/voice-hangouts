@@ -81,12 +81,12 @@ class Connector {
           this.send({
             type: 'offer',
             payload: {
-              calleeId: peerId,
+              peerId,
               offer,
             },
           });
 
-          console.info(`Sent offer to ${peerId}`);
+          console.info(`Sent offer to ${userName} (${peerId})`);
           break;
         }
         case 'answer': {
@@ -96,12 +96,12 @@ class Connector {
           this.send({
             type: 'answer',
             payload: {
-              callerId: peerId,
+              peerId,
               answer,
             },
           });
 
-          console.info(`Sent answer to ${peerId}`);
+          console.info(`Sent answer to ${userName} (${peerId})`);
           break;
         }
         default: {
@@ -120,7 +120,7 @@ class Connector {
           },
         });
 
-        console.info(`Sent icecandidate to ${peerId}`);
+        console.info(`Sent icecandidate to ${userName} (${peerId})`);
       }
     });
 
@@ -128,7 +128,7 @@ class Connector {
       // Update peer's stream
       this.actions.setClient({ uid: peerId, stream });
 
-      console.info(`Received remote stream from ${peerId}`);
+      console.info(`Received remote stream from ${userName} (${peerId})`);
     });
 
     peerConn.addEventListener('error', (err) => {
@@ -164,25 +164,26 @@ class Connector {
     this.actions.setClient({ uid, userName });
   }
 
-  async handlePeerJoined({ calleeId, userName }) {
-    await this.createPeerConnection(calleeId, userName, 'offer');
+  async handlePeerJoined({ peerId, userName }) {
+    console.info(`New peer ${userName} (${peerId}) joined`);
+    await this.createPeerConnection(peerId, userName, 'offer');
   }
 
-  async handleOffer({ callerId, userName, offer }) {
-    console.info(`Received offer from ${callerId}`);
+  async handleOffer({ peerId, userName, offer }) {
+    console.info(`Received offer from ${userName} (${peerId})`);
 
-    const peerConn = await this.createPeerConnection(callerId, userName, 'answer');
+    const peerConn = await this.createPeerConnection(peerId, userName, 'answer');
     await peerConn.setRemoteDescription(new RTCSessionDescription(offer));
   }
 
-  async handleAnswer({ calleeId, answer }) {
-    console.info(`Received answer from ${calleeId}`);
+  async handleAnswer({ peerId, userName, answer }) {
+    console.info(`Received answer from ${userName} (${peerId})`);
 
-    await this.getClient(calleeId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
+    await this.getClient(peerId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
   }
 
-  async handleCandidate({ peerId, candidate }) {
-    console.info(`Received candidate from ${peerId}`);
+  async handleCandidate({ peerId, userName, candidate }) {
+    console.info(`Received candidate from ${userName} (${peerId})`);
 
     const client = this.getClient(peerId);
     if (client && client.peerConn) {
@@ -194,8 +195,8 @@ class Connector {
     this.actions.addMessage(userName, message);
   }
 
-  handlePeerLeft({ uid }) {
-    console.log(`Peer ${uid} has left`);
+  handlePeerLeft({ uid, userName }) {
+    console.log(`Peer ${userName} (${uid}) has left`);
     this.actions.deleteClient(uid);
   }
 
