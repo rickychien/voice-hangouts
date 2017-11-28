@@ -162,15 +162,15 @@ class Connector {
     let err, answer, stream;
     const peerConn = this.getPeerConnection(peerId, userName);
 
+    [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(offer)));
+    if (err) console.error(err);
+
     [err, stream] = await to(this.getSelfViewStream(userName === 'bob'));
     if (err) console.error(err);
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
 
     console.info(`Received offer from ${userName} (${peerId})`);
-
-    [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(offer)));
-    if (err) console.error(err);
 
     [err, answer] = await to(peerConn.createAnswer());
     if (err) console.error(err);
@@ -190,7 +190,7 @@ class Connector {
   }
 
   async handleAnswer({ peerId, userName, answer }) {
-    const peerConn = this.getClient(peerId).peerConn;
+    const { peerConn } = this.getClient(peerId);
     const [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(answer)));
     if (err) console.error(err);
 
@@ -198,12 +198,9 @@ class Connector {
   }
 
   async handleCandidate({ peerId, userName, candidate }) {
-    const client = this.getClient(peerId);
-
-    if (client && client.peerConn && client.peerConn.remoteDescription && client.peerConn.remoteDescription.type) {
-      const [err] = await to(client.peerConn.addIceCandidate(new RTCIceCandidate(candidate)));
-      if (err) console.error(err);
-    }
+    const { peerConn } = this.getClient(peerId);
+    const [err] = await to(peerConn.addIceCandidate(new RTCIceCandidate(candidate)));
+    if (err) console.error(err);
 
     console.info(`Received candidate from ${userName} (${peerId})`);
   }
