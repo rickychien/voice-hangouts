@@ -110,7 +110,7 @@ class Connector {
 
     // Create self-view stream if it doesn't exist
     this.stream = navigator.mediaDevices.getUserMedia({
-      video: true,
+      audio: true,
       fake,
     });
 

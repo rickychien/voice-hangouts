@@ -112,10 +112,9 @@ class App extends React.PureComponent {
               />
               {
                 Array.from(clients).filter(([, peer]) => peer.stream).map(([id, peer]) => (
-                  <video
+                  <audio
                     key={ id }
                     autoPlay
-                    className={ styles.video }
                     src={ peer.stream }
                   />
                 ))
