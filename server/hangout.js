@@ -36,6 +36,7 @@ class Hangout {
           payload: {
             peerId: ws.uid,
             userName: ws.userName,
+            roomName: ws.roomName,
             ...payload,
           },
         });

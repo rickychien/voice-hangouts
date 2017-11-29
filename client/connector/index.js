@@ -1,4 +1,4 @@
-import to from '../utils/to';
+import { log, to } from '../utils';
 
 class Connector {
   constructor(url, actions, store) {
@@ -9,7 +9,11 @@ class Connector {
 
   connect() {
     this.ws.addEventListener('open', () => {
-      console.info('Websocket connected');
+      log('Signaling server connection success');
+    });
+
+    this.ws.addEventListener('error', () => {
+      log('Signaling server connection fail');
     });
 
     this.ws.addEventListener('message', ({ data }) => {
@@ -49,10 +53,6 @@ class Connector {
         }
       }
     });
-
-    this.ws.addEventListener('error', () => {
-      console.info('Websocket connection error');
-    });
   }
 
   send(data) {
@@ -82,30 +82,28 @@ class Connector {
           },
         });
 
-        console.info(`Sent candidate to ${userName} (${peerId})`);
+        log(`Sent ICE candidate to ${userName} (${peerId})`);
       }
     });
 
     peerConn.addEventListener('track', ({ streams }) => {
-      // Update peer's stream
-      this.actions.setClient({ uid: peerId, stream: streams[0] });
+      log(`Received remote stream from '${userName}' (${peerId})`);
 
-      console.info(`Received remote stream from ${userName} (${peerId})`);
+      // Update peer's stream when receiving remote stream
+      this.actions.setClient({ uid: peerId, stream: streams[0] });
     });
 
     peerConn.addEventListener('error', (error) => {
-      console.info(error);
+      log('Error when creating RTCPeerConnection');
     });
 
-    console.info(`Sent local stream to ${userName} (${peerId})`);
-
-    // Store peer before peer's stream arrival
+    // Add peer before remote stream arrival
     this.actions.setClient({ uid: peerId, userName, peerConn });
 
     return peerConn;
   }
 
-  getSelfViewStream(fake) {
+  getUserMedia(fake) {
     if (this.stream) {
       return this.stream;
     }
@@ -119,25 +117,29 @@ class Connector {
     return this.stream;
   }
 
-  async handleJoined({ uid, userName }) {
+  async handleJoined({ uid, userName, roomName }) {
+    log(`User '${userName}' (${uid}) has joined room '${roomName}'`);
+
     this.actions.setUser(uid);
-    // Start sending client's self-view stream to peer
-    const stream = await this.getSelfViewStream(userName === 'bob');
+    const [err, stream] = await to(this.getUserMedia(userName === 'bob'));
+    if (err) throw err;
+
     this.actions.setClient({ uid, userName, stream });
-    console.info('Set self stream on screen');
   }
 
-  async handlePeerJoined({ peerId, userName }) {
+  async handlePeerJoined({ peerId, userName, roomName }) {
+    log(`New peer '${userName}' (${peerId}) joined room '${roomName}'`);
+
     const peerConn = this.getPeerConnection(peerId, userName);
 
     peerConn.addEventListener('negotiationneeded', async () => {
       let err, offer;
 
       [err, offer] = await to(peerConn.createOffer());
-      if (err) console.error(err);
+      if (err) throw err;
 
       [err] = await to(peerConn.setLocalDescription(offer));
-      if (err) console.error(err);
+      if (err) throw err;
 
       this.send({
         type: 'offer',
@@ -147,36 +149,38 @@ class Connector {
         },
       });
 
-      console.info(`Sent offer to ${userName} (${peerId})`);
+      log(`Sent offer to '${userName}' (${peerId})`);
     });
 
-    const [err, stream] = await to(this.getSelfViewStream(userName === 'bob'));
-    if (err) console.error(err);
+    const [err, stream] = await to(this.getUserMedia(userName === 'bob'));
+    if (err) throw err;
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
 
-    console.info(`New peer ${userName} (${peerId}) joined`);
+    log(`Sent local stream to remote user '${userName}' (${peerId})`);
   }
 
   async handleOffer({ peerId, userName, offer }) {
+    log(`Received offer from '${userName}' (${peerId})`);
+
     let err, answer, stream;
     const peerConn = this.getPeerConnection(peerId, userName);
 
     [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(offer)));
-    if (err) console.error(err);
+    if (err) throw err;
 
-    [err, stream] = await to(this.getSelfViewStream(userName === 'bob'));
-    if (err) console.error(err);
+    [err, stream] = await to(this.getUserMedia(userName === 'bob'));
+    if (err) throw err;
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
 
-    console.info(`Received offer from ${userName} (${peerId})`);
+    log(`Sent local stream to remote user '${userName}' (${peerId})`);
 
     [err, answer] = await to(peerConn.createAnswer());
-    if (err) console.error(err);
+    if (err) throw err;
 
     [err] = await to(peerConn.setLocalDescription(answer));
-    if (err) console.error(err);
+    if (err) throw err;
 
     this.send({
       type: 'answer',
@@ -186,23 +190,23 @@ class Connector {
       },
     });
 
-    console.info(`Sent answer to ${userName} (${peerId})`);
+    log(`Sent answer to '${userName}' (${peerId})`);
   }
 
   async handleAnswer({ peerId, userName, answer }) {
+    log(`Received answer from '${userName}' (${peerId})`);
+
     const { peerConn } = this.getClient(peerId);
     const [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(answer)));
-    if (err) console.error(err);
-
-    console.info(`Received answer from ${userName} (${peerId})`);
+    if (err) throw err;
   }
 
   async handleCandidate({ peerId, userName, candidate }) {
+    log(`Received ICE candidate from '${userName}' (${peerId})`);
+
     const { peerConn } = this.getClient(peerId);
     const [err] = await to(peerConn.addIceCandidate(new RTCIceCandidate(candidate)));
-    if (err) console.error(err);
-
-    console.info(`Received candidate from ${userName} (${peerId})`);
+    if (err) throw err;
   }
 
   handleMessage({ userName, message }) {
@@ -210,7 +214,8 @@ class Connector {
   }
 
   handlePeerLeft({ peerId, userName }) {
-    console.log(`Peer ${userName} (${peerId}) has left`);
+    log(`Peer '${userName}' (${peerId}) has left`);
+
     this.actions.deleteClient(peerId);
   }
 
