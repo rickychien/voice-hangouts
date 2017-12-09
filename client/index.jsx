@@ -9,9 +9,11 @@ import configureStore from './store';
 import Connector from './connector';
 import App from './components/App';
 
+const HOST = location.origin.replace(/^http/, 'ws');
+
 const store = configureStore();
 const actions = bindActionCreators(Actions, store.dispatch);
-const connector = new Connector('ws://localhost:3000/message', actions, store);
+const connector = new Connector(HOST, actions, store);
 
 render(
   <Provider store={ store }>
