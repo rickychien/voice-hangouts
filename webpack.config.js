@@ -1,15 +1,17 @@
 const webpack = require('webpack');
 
+const isDev = process.env.NODE_ENV !== "production";
+
 module.exports = {
   entry: {
     client: [
       './client/index.jsx',
-      'webpack-hot-middleware/client',
-    ],
+      isDev && 'webpack-hot-middleware/client',
+    ].filter((file) => file),
   },
   output: {
     path: `${__dirname}/public`,
-    filename: '[name].js',
+    filename: 'bundle.js',
     publicPath: '/',
   },
   plugins: [
@@ -17,7 +19,7 @@ module.exports = {
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
-        NODE_ENV: JSON.stringify('development'),
+        NODE_ENV: JSON.stringify(isDev ? 'development' : 'production'),
       },
     }),
   ],
@@ -51,5 +53,5 @@ module.exports = {
       },
     ],
   },
-  devtool: 'source-map',
+  devtool: isDev && 'source-map',
 };

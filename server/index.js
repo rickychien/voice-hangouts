@@ -16,6 +16,7 @@ const router = new Router();
 const wsRouter = new Router();
 const PORT = 3000;
 
+const isDev = process.env.NODE_ENV !== "production";
 const workDir = path.resolve(__dirname, '..');
 const devMiddlewareConfig = {
   noInfo: true,
@@ -40,8 +41,12 @@ wsRouter.get('/message', (ctx) => {
 app.ws
   .use(wsRouter.routes());
 
+if (isDev) {
+  app
+    .use(convert(devMiddleware(compiler, devMiddlewareConfig)))
+    .use(convert(hotMiddleware(compiler)));
+}
+
 app
-  .use(convert(devMiddleware(compiler, devMiddlewareConfig)))
-  .use(convert(hotMiddleware(compiler)))
   .use(router.routes())
   .listen(PORT);

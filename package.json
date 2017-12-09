@@ -8,6 +8,8 @@
     "node": "9.2.1"
   },
   "scripts": {
+    "build": "npm run clean && NODE_ENV=production $(npm bin)/webpack --progress --colors --config ./webpack.config.js && cp ./client/index.html ./public/",
+    "clean": "rm -rf ./public",
     "start": "node server/index.js"
   },
   "dependencies": {
