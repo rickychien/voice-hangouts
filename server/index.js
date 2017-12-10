@@ -12,7 +12,7 @@ const isDev = process.env.NODE_ENV !== "production";
 const app = websockify(new Koa());
 const router = new Router();
 const wsRouter = new Router();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 router.get('/*', async (ctx) => {
   await send(ctx, ctx.path, { index: 'index.html', root: `${config.output.path}` });
