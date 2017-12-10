@@ -1,7 +1,7 @@
 {
-  "name": "hangout",
+  "name": "voice-hangouts",
   "version": "0.0.1",
-  "description": "Hangout with your friends",
+  "description": "Voice hangouts with your friends",
   "license": "MIT",
   "main": "server/index.js",
   "engines": {
