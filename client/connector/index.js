@@ -234,9 +234,11 @@ class Connector {
     this.send({
       type: 'leave',
       payload: {
-        uid: this.store.getState().uid,
+        uid: this.store.getState().user.uid,
       },
     });
+
+    this.actions.setUser({});
 
     this.store.getState().clients.forEach((client) => {
       if (client.peerConn) {

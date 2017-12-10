@@ -1,5 +1,5 @@
 const initialState = {
-  user: undefined,
+  user: {},
   clients: new Map(),
   messages: [],
 };

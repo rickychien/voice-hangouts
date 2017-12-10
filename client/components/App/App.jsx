@@ -11,7 +11,7 @@ class App extends React.PureComponent {
     connector: PropTypes.object.isRequired,
     clients: PropTypes.object.isRequired,
     messages: PropTypes.array.isRequired,
-    user: PropTypes.object,
+    user: PropTypes.object.isRequired,
     addMessage: PropTypes.func.isRequired,
   };
 
@@ -37,7 +37,7 @@ class App extends React.PureComponent {
 
   onLeaveRoom = () => {
     const { user } = this.props;
-    if (user) {
+    if (user.uid) {
       this.props.connector.leaveRoom(user.uid);
     }
   }
@@ -50,7 +50,7 @@ class App extends React.PureComponent {
   onSendMessage = (evt) => {
     const { key } = evt;
     const { message } = this.state;
-    const { addMessage, clients, connector, user } = this.props;
+    const { addMessage, connector, user } = this.props;
 
     if (key === 'Enter' && message) {
       addMessage(user.userName, message);
@@ -67,7 +67,7 @@ class App extends React.PureComponent {
       <div className="app">
         <h1 className={ styles.appTitle }>Hangout</h1>
         {
-          !user ?
+          !user.uid ?
             <div className={ styles.app }>
               <h2 className={ styles.roomTitle }>Start a chatroom</h2>
               <input
