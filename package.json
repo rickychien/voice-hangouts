@@ -12,7 +12,8 @@
   "scripts": {
     "build": "yarn clean && NODE_ENV=production $(npm bin)/webpack --progress --colors --config ./webpack.config.js && cp ./client/index.html ./public/",
     "clean": "rm -rf ./public/*",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "postinstall": "yarn build"
   },
   "dependencies": {
     "css-loader": "^0.28.7",
