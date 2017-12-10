@@ -65,7 +65,7 @@ class App extends React.PureComponent {
 
     return (
       <div className="app">
-        <h1 className={ styles.appTitle }>Hangout</h1>
+        <h1 className={ styles.appTitle }>Voice Hangouts</h1>
         {
           !user.uid ?
             <div className={ styles.app }>
