@@ -2,6 +2,7 @@ import { log, to } from '../utils';
 
 class Connector {
   constructor(url, actions, store) {
+    this.url = url;
     this.ws = new WebSocket(url);
     this.actions = actions;
     this.store = store;
@@ -10,6 +11,11 @@ class Connector {
   connect() {
     this.ws.addEventListener('open', () => {
       log('Signaling server connection success');
+    });
+
+    this.ws.addEventListener('close', () => {
+      log("Websocket is closed, reconnecting...")
+      this.ws = new WebSocket(this.url);
     });
 
     this.ws.addEventListener('error', () => {
