@@ -3,26 +3,27 @@ import { log, to } from '../utils';
 class Connector {
   constructor(url, actions, store) {
     this.url = url;
-    this.ws = new WebSocket(url);
     this.actions = actions;
     this.store = store;
   }
 
   connect() {
-    this.ws.addEventListener('open', () => {
+    let ws = this.ws = new WebSocket(this.url);
+
+    ws.addEventListener('open', () => {
       log('Signaling server connection success');
     });
 
-    this.ws.addEventListener('close', () => {
-      log("Websocket is closed, reconnecting...")
-      this.ws = new WebSocket(this.url);
+    ws.addEventListener('close', () => {
+      log("Websocket is closed, reconnecting...");
+      connect(url);
     });
 
-    this.ws.addEventListener('error', () => {
+    ws.addEventListener('error', () => {
       log('Signaling server connection fail');
     });
 
-    this.ws.addEventListener('message', ({ data }) => {
+    ws.addEventListener('message', ({ data }) => {
       const { type, payload } = JSON.parse(data);
 
       switch (type) {
@@ -59,6 +60,8 @@ class Connector {
         }
       }
     });
+
+    return ws;
   }
 
   send(data) {

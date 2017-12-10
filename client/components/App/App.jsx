@@ -31,8 +31,10 @@ class App extends React.PureComponent {
 
   onJoinRoom = () => {
     const { roomName, userName } = this.state;
-    this.props.connector.connect();
-    this.props.connector.joinRoom(roomName, userName);
+    let ws = this.props.connector.connect();
+    ws.addEventListener('open', () => {
+      this.props.connector.joinRoom(roomName, userName);
+    });
   }
 
   onLeaveRoom = () => {
