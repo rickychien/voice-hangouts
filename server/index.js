@@ -14,7 +14,6 @@ const router = new Router();
 const wsRouter = new Router();
 const PORT = 3000;
 
-
 router.get('/*', async (ctx) => {
   await send(ctx, ctx.path, { index: 'index.html', root: `${config.output.path}` });
 });
