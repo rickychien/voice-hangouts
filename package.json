@@ -17,10 +17,8 @@
   "dependencies": {
     "css-loader": "^0.28.7",
     "koa": "^2.4.1",
-    "koa-convert": "^1.2.0",
     "koa-router": "^7.3.0",
     "koa-send": "^4.1.1",
-    "koa-webpack-middleware": "^1.0.7",
     "koa-websocket": "^4.1.0",
     "prop-types": "^15.6.0",
     "react": "^16.1.1",
@@ -30,10 +28,8 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "style-loader": "^0.19.0",
-    "uglifyjs-webpack-plugin": "^1.0.0-rc.0",
     "url-loader": "^0.6.2",
     "uuid": "^3.1.0",
-    "webpack": "^3.8.1",
     "webrtc-adapter": "^6.0.2"
   },
   "devDependencies": {
@@ -47,6 +43,10 @@
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
-    "eslint-plugin-react": "^7.5.0"
+    "eslint-plugin-react": "^7.5.0",
+    "koa-convert": "^1.2.0",
+    "koa-webpack-middleware": "^1.0.7",
+    "uglifyjs-webpack-plugin": "^1.0.0-rc.0",
+    "webpack": "^3.8.1"
   }
 }
