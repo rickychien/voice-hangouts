@@ -34,11 +34,15 @@ export function deleteClient(uid) {
 }
 
 
-export function setUser(uid) {
+export function setUser({ uid, userName, roomName }) {
   return {
     type: 'SET_USER',
     payload: {
-      uid,
+      user: {
+        uid,
+        userName,
+        roomName,
+      },
     },
   };
 }

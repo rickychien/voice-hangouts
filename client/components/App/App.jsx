@@ -11,7 +11,7 @@ class App extends React.PureComponent {
     connector: PropTypes.object.isRequired,
     clients: PropTypes.object.isRequired,
     messages: PropTypes.array.isRequired,
-    uid: PropTypes.string.isRequired,
+    user: PropTypes.object,
     addMessage: PropTypes.func.isRequired,
   };
 
@@ -36,7 +36,10 @@ class App extends React.PureComponent {
   }
 
   onLeaveRoom = () => {
-    this.props.connector.leaveRoom(this.props.uid);
+    const { user } = this.props;
+    if (user) {
+      this.props.connector.leaveRoom(user.uid);
+    }
   }
 
   onInputChange = (evt) => {
@@ -47,24 +50,24 @@ class App extends React.PureComponent {
   onSendMessage = (evt) => {
     const { key } = evt;
     const { message } = this.state;
-    const { addMessage, clients, connector, uid } = this.props;
+    const { addMessage, clients, connector, user } = this.props;
 
     if (key === 'Enter' && message) {
-      addMessage(clients.get(uid).userName, message);
+      addMessage(user.userName, message);
       connector.sendMessage(message);
       this.setState({ message: '' });
     }
   }
 
   render() {
-    const { uid, messages, clients } = this.props;
+    const { user, messages, clients } = this.props;
     const { message, roomName, userName } = this.state;
 
     return (
       <div className="app">
         <h1 className={ styles.appTitle }>Hangout</h1>
         {
-          !uid ?
+          !user ?
             <div className={ styles.app }>
               <h2 className={ styles.roomTitle }>Start a chatroom</h2>
               <input
@@ -130,7 +133,7 @@ export default connect(
   (state) => ({
     clients: state.clients,
     messages: state.messages,
-    uid: state.uid,
+    user: state.user,
   }),
   (dispatch) => ({
     addMessage: (userName, message) => dispatch(Actions.addMessage(userName, message)),

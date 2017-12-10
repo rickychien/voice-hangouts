@@ -59,6 +59,10 @@ class Connector {
     this.ws.send(JSON.stringify(data));
   }
 
+  getUser() {
+    return this.store.getState().user;
+  }
+
   getClient(id) {
     return this.store.getState().clients.get(id);
   }
@@ -111,7 +115,7 @@ class Connector {
     // Create self-view stream if it doesn't exist
     this.stream = navigator.mediaDevices.getUserMedia({
       audio: true,
-      fake,
+      fake: this.getUser().userName === 'bob',
     });
 
     return this.stream;
@@ -120,11 +124,7 @@ class Connector {
   async handleJoined({ uid, userName, roomName }) {
     log(`User '${userName}' (${uid}) has joined room '${roomName}'`);
 
-    this.actions.setUser(uid);
-    const [err, stream] = await to(this.getUserMedia(userName === 'bob'));
-    if (err) throw err;
-
-    this.actions.setClient({ uid, userName, stream });
+    this.actions.setUser({ uid, userName, roomName });
   }
 
   async handlePeerJoined({ peerId, userName, roomName }) {
@@ -152,7 +152,7 @@ class Connector {
       log(`Sent offer to '${userName}' (${peerId})`);
     });
 
-    const [err, stream] = await to(this.getUserMedia(userName === 'bob'));
+    const [err, stream] = await to(this.getUserMedia());
     if (err) throw err;
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
@@ -169,7 +169,7 @@ class Connector {
     [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(offer)));
     if (err) throw err;
 
-    [err, stream] = await to(this.getUserMedia(userName === 'bob'));
+    [err, stream] = await to(this.getUserMedia());
     if (err) throw err;
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));

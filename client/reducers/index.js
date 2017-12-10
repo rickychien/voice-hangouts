@@ -1,7 +1,7 @@
 const initialState = {
+  user: undefined,
   clients: new Map(),
   messages: [],
-  uid: '',
 };
 
 let mid = 0;
@@ -20,7 +20,7 @@ function mergeClient(state = {
 export default function (state = initialState, { type, payload }) {
   switch (type) {
     case 'SET_USER': {
-      return { ...state, ...{ uid: payload.uid } };
+      return { ...state, ...{ user: payload.user } };
     }
     case 'ADD_MESSAGE': {
       const { userName, message } = payload;

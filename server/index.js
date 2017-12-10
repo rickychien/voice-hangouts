@@ -17,9 +17,7 @@ const wsRouter = new Router();
 const PORT = 3000;
 
 const isDev = process.env.NODE_ENV !== "production";
-const workDir = path.resolve(__dirname, '..');
 const devMiddlewareConfig = {
-  noInfo: true,
   publicPath: config.output.publicPath,
   stats: {
     colors: true,
@@ -27,10 +25,10 @@ const devMiddlewareConfig = {
 };
 
 router.get('/*', async (ctx) => {
-  await send(ctx, ctx.path, { index: 'public/index.html', root: `${workDir}` });
+  await send(ctx, ctx.path, { index: 'index.html', root: `${config.output.path}` });
 });
 
-wsRouter.get('/message', (ctx) => {
+wsRouter.get('/', (ctx) => {
   const hangout = new Hangout(app.ws.server.clients);
   const { websocket } = ctx;
   websocket.on('message', (message) => {

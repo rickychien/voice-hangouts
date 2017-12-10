@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -22,7 +23,15 @@ module.exports = {
         NODE_ENV: JSON.stringify(isDev ? 'development' : 'production'),
       },
     }),
-  ],
+    !isDev && new UglifyJSPlugin({
+      uglifyOptions: {
+        beautify: false,
+        ecma: 6,
+        compress: true,
+        comments: false
+      }
+    }),
+  ].filter((file) => file),
   resolve: {
     extensions: ['.js', '.jsx'],
   },
