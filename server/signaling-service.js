@@ -1,6 +1,6 @@
 const uuidv4 = require('uuid/v4');
 
-class Hangout {
+class SignalingService {
   constructor(wsClients) {
     this.wsClients = wsClients;
   }
@@ -12,7 +12,7 @@ class Hangout {
   sendToPeer(type, ws, payload) {
     const { peerId } = payload;
 
-    for (let wsClient of this.wsClients) {
+    this.wsClients.forEach((wsClient) => {
       if (wsClient.uid === peerId) {
         this.send(wsClient, {
           type,
@@ -22,14 +22,14 @@ class Hangout {
             [type]: payload[type],
           },
         });
-
-        console.info(`[Send] '${ws.userName}' sent '${type}' to user '${wsClient.userName}'`);
       }
-    }
+
+      console.info(`[Send] '${ws.userName}' sent '${type}' to user '${wsClient.userName}'`);
+    });
   }
 
   broadcastToRoomPeers(type, ws, payload) {
-    for (let wsClient of this.wsClients) {
+    this.wsClients.forEach((wsClient) => {
       if (wsClient.roomName === ws.roomName && wsClient.uid !== ws.uid) {
         this.send(wsClient, {
           type,
@@ -41,7 +41,7 @@ class Hangout {
           },
         });
       }
-    }
+    });
 
     console.info(`[Broadcast] '${ws.userName}' broadcasted '${type}' to all peers in room '${ws.roomName}'.`);
   }
@@ -96,4 +96,4 @@ class Hangout {
   }
 }
 
-module.exports = Hangout;
+module.exports = SignalingService;

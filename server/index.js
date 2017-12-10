@@ -1,14 +1,13 @@
-const path = require('path');
 const Koa = require('koa');
 const convert = require('koa-convert');
 const Router = require('koa-router');
 const send = require('koa-send');
 const websockify = require('koa-websocket');
 
-const Hangout = require('./hangout');
+const SignalingService = require('./signaling-service');
 const config = require('../webpack.config');
 
-const isDev = process.env.NODE_ENV !== "production";
+const isDev = process.env.NODE_ENV !== 'production';
 const app = websockify(new Koa());
 const router = new Router();
 const wsRouter = new Router();
@@ -19,10 +18,10 @@ router.get('/*', async (ctx) => {
 });
 
 wsRouter.get('/', (ctx) => {
-  const hangout = new Hangout(app.ws.server.clients);
+  const signalingService = new SignalingService(app.ws.server.clients);
   const { websocket } = ctx;
   websocket.on('message', (message) => {
-    hangout.onMessage(websocket, message);
+    signalingService.onMessage(websocket, message);
   });
 });
 

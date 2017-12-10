@@ -14,6 +14,7 @@ rules:
   class-methods-use-this: off
   no-case-declarations: off
   no-param-reassign: off
+  no-console: off
   global-require: off
   react/jsx-curly-spacing:
     - error

@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-const isDev = process.env.NODE_ENV !== "production";
+const isDev = process.env.NODE_ENV !== 'production';
 
 module.exports = {
   entry: {
@@ -28,8 +28,8 @@ module.exports = {
         beautify: false,
         ecma: 6,
         compress: true,
-        comments: false
-      }
+        comments: false,
+      },
     }),
   ].filter((file) => file),
   resolve: {
