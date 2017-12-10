@@ -17,7 +17,7 @@ class App extends React.PureComponent {
 
   state = {
     roomName: 'test',
-    userName: 'bob',
+    userName: '',
     message: '',
   };
 
