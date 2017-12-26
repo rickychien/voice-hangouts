@@ -123,10 +123,7 @@ class Connector {
     }
 
     // Create self-view stream if it doesn't exist
-    this.stream = navigator.mediaDevices.getUserMedia({
-      audio: true,
-      fake: this.getUser().userName === 'bob',
-    });
+    this.stream = navigator.mediaDevices.getUserMedia({ audio: true });
 
     return this.stream;
   }
