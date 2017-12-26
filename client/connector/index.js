@@ -7,16 +7,18 @@ class Connector {
     this.store = store;
   }
 
-  connect() {
+  connect(roomName, userName) {
     let ws = this.ws = new WebSocket(this.url);
+    window.ws = ws;
 
     ws.addEventListener('open', () => {
       log('Signaling server connection success');
+      this.joinRoom(roomName, userName);
     });
 
     ws.addEventListener('close', () => {
       log("Websocket is closed, reconnecting...");
-      connect(url);
+      this.connect(roomName, userName);
     });
 
     ws.addEventListener('error', () => {
