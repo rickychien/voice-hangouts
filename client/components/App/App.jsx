@@ -6,6 +6,8 @@ import Actions from '../../actions';
 
 import styles from './App.css';
 
+const DOMAIN_URL = 'voice-hangouts.herokuapp.com/';
+
 class App extends React.PureComponent {
   static propTypes = {
     connector: PropTypes.object.isRequired,
@@ -16,8 +18,7 @@ class App extends React.PureComponent {
   };
 
   state = {
-    roomName: 'test',
-    userName: '',
+    roomName: '',
     message: '',
   };
 
@@ -30,8 +31,7 @@ class App extends React.PureComponent {
   }
 
   onJoinRoom = () => {
-    const { roomName, userName } = this.state;
-    this.props.connector.connect(roomName, userName);
+    this.props.connector.connect(this.state.roomName || 'ballroom');
   }
 
   onLeaveRoom = () => {
@@ -44,6 +44,12 @@ class App extends React.PureComponent {
   onInputChange = (evt) => {
     const { target: { name, value } } = evt;
     this.setState({ [name]: value });
+  }
+
+  onRoomNameKeyPress = (evt) => {
+    if (evt.key === 'Enter') {
+      this.onJoinRoom();
+    }
   }
 
   onSendMessage = (evt) => {
@@ -60,33 +66,31 @@ class App extends React.PureComponent {
 
   render() {
     const { user, messages, clients } = this.props;
-    const { message, roomName, userName } = this.state;
+    const { message, roomName } = this.state;
 
     return (
-      <div className="app">
+      <div className={ styles.app }>
         <h1 className={ styles.appTitle }>Voice Hangouts</h1>
+        <p>Truly lightweight audio-only WebRTC chat</p>
         {
           !user.uid ?
-            <div className={ styles.app }>
-              <h2 className={ styles.roomTitle }>Start a chatroom</h2>
+            <div className={ styles.startChatForm }>
+              <span className={ styles.createRoomInput }>
+                <span className={ styles.domain }>{ DOMAIN_URL }</span>
+                <input
+                  autoFocus
+                  className={ styles.roomNameInput }
+                  name="roomName"
+                  placeholder="room"
+                  value={ roomName }
+                  onChange={ this.onInputChange }
+                  onKeyPress={ this.onRoomNameKeyPress }
+                />
+              </span>
               <input
-                className={ styles.chatInput }
-                name="roomName"
-                placeholder="Room name"
-                value={ roomName }
-                onChange={ this.onInputChange }
-              />
-              <input
-                className={ styles.chatInput }
-                name="userName"
-                placeholder="User name"
-                value={ userName }
-                onChange={ this.onInputChange }
-              />
-              <input
-                className={ styles.chatInput }
+                className={ styles.startChatButton }
                 type="submit"
-                value="Join a room"
+                value="Go"
                 onClick={ this.onJoinRoom }
               />
             </div>

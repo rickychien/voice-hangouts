@@ -52,23 +52,23 @@ class SignalingService {
   }
 
   onClientJoin(ws, payload) {
-    const { roomName, userName } = payload;
+    const { roomName } = payload;
 
     // Generate unique user id for the new client
     const uid = uuidv4();
 
     // Store the client
     ws.uid = uid;
-    ws.userName = userName;
+    ws.userName = 'Guest';
     ws.roomName = roomName;
 
     // Send vaild uid back to client
     this.send(ws, {
       type: 'joined',
       payload: {
-        uid,
-        userName,
-        roomName,
+        uid: ws.uid,
+        userName: ws.userName,
+        roomName: ws.roomName,
       },
     });
 

@@ -1,7 +1,27 @@
+body,
+input {
+  font: inherit;
+}
+
+p {
+  color: #4d5659;
+}
+
+* {
+  font-family: Arial;
+  box-sizing: border-box;
+}
+
+*:focus {
+  outline: none;
+}
+
 .app {
-  width: 300px;
-  height: 250px;
+  width: 85%;
+  height: 100%;
+  max-width: 800px;
   margin: auto;
+  text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -10,11 +30,41 @@
 
 .appTitle {
   text-align: center;
+  background: -webkit-linear-gradient(top,#fd0b58 0,#a32b68 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.chatInput {
-  width: 120px;
-  margin: 5px;
+.domain {
+  color: #b7c0c3;
+}
+
+.startChatForm {
+  display: flex;
+  margin: 20px;
+}
+
+.createRoomInput {
+  border: 1px #00b0e9 solid;
+  padding: 10px;
+  border-radius: 3px;
+}
+
+.roomNameInput {
+  width: 100px;
+  border: none;
+  color: #00b0e9;
+}
+
+.startChatButton {
+  color: white;
+  background-color: #00b0e9;
+  border: none;
+  border-radius: 3px;
+  text-align: center;
+  margin: 0 5px;
+  padding: 11px;
+  cursor: pointer;
 }
 
 .roomTitle {
@@ -24,6 +74,7 @@
 .messages {
   width: 100%;
   flex: 1;
+  text-align: start;
 }
 
 .messageInput {
