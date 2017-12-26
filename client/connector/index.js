@@ -9,7 +9,6 @@ class Connector {
 
   connect(roomName, userName) {
     let ws = this.ws = new WebSocket(this.url);
-    window.ws = ws;
 
     ws.addEventListener('open', () => {
       log('Signaling server connection success');
