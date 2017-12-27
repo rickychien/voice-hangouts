@@ -14,7 +14,8 @@ const wsRouter = new Router();
 const PORT = process.env.PORT || 3000;
 
 router.get('/*', async (ctx) => {
-  await send(ctx, '/', { index: 'index.html', root: `${config.output.path}` });
+  const path = ctx.path === '/bundle.js' ? ctx.path : '/';
+  await send(ctx, path, { index: 'index.html', root: `${config.output.path}` });
 });
 
 wsRouter.get('/*', (ctx) => {
