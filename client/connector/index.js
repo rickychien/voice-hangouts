@@ -17,6 +17,7 @@ class Connector {
     ws.addEventListener('close', () => {
       log("Websocket is closed, reconnecting...");
       this.connect();
+      this.joinRoom(this.roomName);
     });
 
     ws.addEventListener('error', () => {
@@ -226,6 +227,8 @@ class Connector {
   }
 
   joinRoom(roomName) {
+    this.roomName = roomName;
+
     this.ws.addEventListener('open', () => {
       this.send({
         type: 'join',
