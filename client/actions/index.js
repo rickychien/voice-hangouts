@@ -47,9 +47,19 @@ export function setUser({ uid, userName, roomName }) {
   };
 }
 
+export function setChatRoomReady(chatRoomReady) {
+  return {
+    type: 'SET_CHATROOM_READY',
+    payload: {
+      chatRoomReady,
+    },
+  };
+}
+
 export default {
   addMessage,
   setClient,
   deleteClient,
   setUser,
+  setChatRoomReady,
 };

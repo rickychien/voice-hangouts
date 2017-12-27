@@ -12,6 +12,7 @@ class Connector {
 
     ws.addEventListener('open', () => {
       log('Signaling server connection success');
+      this.actions.setChatRoomReady(true);
     });
 
     ws.addEventListener('close', () => {

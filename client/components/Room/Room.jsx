@@ -10,6 +10,7 @@ class Room extends React.PureComponent {
   static propTypes = {
     connector: PropTypes.object.isRequired,
     clients: PropTypes.object.isRequired,
+    chatRoomReady: PropTypes.bool.isRequired,
     messages: PropTypes.array.isRequired,
     user: PropTypes.object.isRequired,
     addMessage: PropTypes.func.isRequired,
@@ -37,7 +38,7 @@ class Room extends React.PureComponent {
   }
 
   render() {
-    const { messages, clients } = this.props;
+    const { messages, chatRoomReady, clients } = this.props;
     const { message } = this.state;
 
     return (
@@ -53,10 +54,11 @@ class Room extends React.PureComponent {
             )
           }
         </div>
-        <div className={ styles.messageBox }>
+        <div className={ styles.messageBox } disabled={ !chatRoomReady }>
           <input
             autoFocus
             className={ styles.messageInput }
+            disabled={ !chatRoomReady }
             name="message"
             placeholder="type message here..."
             value={ message }
@@ -65,6 +67,7 @@ class Room extends React.PureComponent {
           />
           <input
             className={ styles.sendButton }
+            disabled={ !chatRoomReady }
             type="submit"
             value="Send"
             onClick={ this.onSendMessage }
@@ -87,6 +90,7 @@ class Room extends React.PureComponent {
 export default connect(
   (state) => ({
     clients: state.clients,
+    chatRoomReady: state.chatRoomReady,
     messages: state.messages,
     user: state.user,
   }),

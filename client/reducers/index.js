@@ -1,5 +1,6 @@
 const initialState = {
   user: {},
+  chatRoomReady: false,
   clients: new Map(),
   messages: [],
 };
@@ -41,6 +42,9 @@ export default function (state = initialState, { type, payload }) {
     case 'DELETE_CLIENT': {
       state.clients.delete(payload.uid);
       return { ...state, ...{ clients: new Map(state.clients) } };
+    }
+    case 'SET_CHATROOM_READY': {
+      return { ...state, ...{ chatRoomReady: payload.chatRoomReady } };
     }
     default: {
       return state;

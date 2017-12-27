@@ -21,6 +21,10 @@
   width: 100%;
 }
 
+.messageBox[disabled] {
+  opacity: 0.5;
+}
+
 .messageInput {
   border: 1px #00b0e9 solid;
   padding: 10px;
