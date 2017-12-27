@@ -30,10 +30,17 @@
   justify-content: space-between;
 }
 
+.messageUser {
+  margin-right: 5px;
+  color: #2756b1;
+}
+
 .timestamp {
   cursor: pointer;
   color: grey;
   font-size: 0.7rem;
+  text-align: end;
+  white-space: nowrap;
 }
 
 .timestamp:hover {

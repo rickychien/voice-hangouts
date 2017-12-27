@@ -53,6 +53,10 @@ class Room extends React.PureComponent {
     return client ? client.userName : 'Guest';
   }
 
+  isUrl(url) {
+    return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig.test(url);
+  }
+
   render() {
     const { chatRoomReady, clients, messages, user } = this.props;
     const { message } = this.state;
@@ -65,13 +69,23 @@ class Room extends React.PureComponent {
               (
                 <div key={ msg.mid } className={ styles.messageRow }>
                   <span>
-                    {`${this.getUserName(msg.uid)}: ${msg.message}`}
+                    <span className={ styles.messageUser }>
+                      { `${this.getUserName(msg.uid)}:` }
+                    </span>
+                    <span>
+                      {
+                        !this.isUrl(msg.message) ?
+                          msg.message
+                        :
+                          <a target="_blank" href={ msg.message }>{ msg.message }</a>
+                      }
+                    </span>
                   </span>
                   <span
                     className={ styles.timestamp }
                     title={ msg.timestamp.toLocaleDateString() }
                   >
-                    {`${msg.timestamp.toLocaleTimeString()}`}
+                    { `${msg.timestamp.toLocaleTimeString()}` }
                   </span>
                 </div>
               ),
