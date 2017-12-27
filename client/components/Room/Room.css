@@ -40,6 +40,10 @@
   margin: 0 5px;
 }
 
+.userName:hover {
+  text-decoration: underline;
+}
+
 .editUserName {
   width: 80%;
   color: white;
