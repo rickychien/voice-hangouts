@@ -18,7 +18,7 @@ class Connector {
     ws.addEventListener('close', () => {
       log("Websocket is closed, reconnecting...");
       this.connect();
-      this.joinRoom(this.roomName);
+      this.joinRoom();
     });
 
     ws.addEventListener('error', () => {
@@ -136,6 +136,11 @@ class Connector {
   }
 
   async handlePeerJoined({ peerId, userName, roomName }) {
+    // If peer connection has established, we skip the negotiation process
+    if (this.getClient(peerId)) {
+      return;
+    }
+
     log(`New peer '${userName}' (${peerId}) joined room '${roomName}'`);
 
     const peerConn = this.getPeerConnection(peerId, userName);
@@ -228,13 +233,14 @@ class Connector {
   }
 
   joinRoom(roomName) {
-    this.roomName = roomName;
+    const user = this.getUser() || {};
 
     this.ws.addEventListener('open', () => {
       this.send({
         type: 'join',
         payload: {
-          roomName,
+          roomName: roomName || user.roomName,
+          uid: user.uid,
         },
       });
     });
