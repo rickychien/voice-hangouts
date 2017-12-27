@@ -50,7 +50,6 @@ class Room extends React.PureComponent {
       return user.userName;
     }
 
-    console.log(uid)
     const client = clients.get(uid);
     return client ? client.userName : 'Guest';
   }
