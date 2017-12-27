@@ -53,6 +53,10 @@ class Connector {
           this.handleCandidate(payload);
           break;
         }
+        case 'update': {
+          this.handleUpdate(payload);
+          break;
+        }
         case 'message': {
           this.handleMessage(payload);
           break;
@@ -229,8 +233,12 @@ class Connector {
     if (err) throw err;
   }
 
-  handleMessage({ userName, message }) {
-    this.actions.addMessage(userName, message);
+  handleMessage({ peerId, message }) {
+    this.actions.addMessage(peerId, message);
+  }
+
+  handleUpdate({ user: { uid, userName }}) {
+    this.actions.setClient({ uid, userName });
   }
 
   handlePeerLeft({ peerId, userName }) {
@@ -273,6 +281,15 @@ class Connector {
       type: 'message',
       payload: {
         message,
+      },
+    });
+  }
+
+  sendUpdate(user) {
+    this.send({
+      type: 'update',
+      payload: {
+        user,
       },
     });
   }

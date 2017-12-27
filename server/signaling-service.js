@@ -88,6 +88,10 @@ class SignalingService {
     this.broadcastToRoomPeers('message', ws, payload);
   }
 
+  onClientUpdate(ws, payload) {
+    this.broadcastToRoomPeers('update', ws, payload);
+  }
+
   onClientLeave(ws) {
     this.broadcastToRoomPeers('peer left', ws);
   }

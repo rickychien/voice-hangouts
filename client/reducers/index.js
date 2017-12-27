@@ -7,6 +7,16 @@ const initialState = {
 
 let mid = 0;
 
+function mergeUser(state = {
+  uid: '',
+  userName: undefined,
+  roomName: undefined,
+}, newState) {
+  // Strip undefined properties
+  Object.keys(newState).forEach((key) => !newState[key] && delete newState[key]);
+  return { ...state, ...newState };
+}
+
 function mergeClient(state = {
   uid: '',
   userName: undefined,
@@ -21,16 +31,16 @@ function mergeClient(state = {
 export default function (state = initialState, { type, payload }) {
   switch (type) {
     case 'SET_USER': {
-      return { ...state, ...{ user: payload.user } };
+      return { ...state, ...{ user: mergeUser(state.user, payload.user) }};
     }
     case 'ADD_MESSAGE': {
-      const { userName, message } = payload;
+      const { uid, message } = payload;
       mid += 1;
       return {
         ...state,
         messages: [...state.messages, {
           mid,
-          userName,
+          uid,
           message,
         }],
       };

@@ -1,8 +1,8 @@
-export function addMessage(userName, message) {
+export function addMessage(uid, message) {
   return {
     type: 'ADD_MESSAGE',
     payload: {
-      userName,
+      uid,
       message,
     },
   };

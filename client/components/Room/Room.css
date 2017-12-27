@@ -21,6 +21,32 @@
   width: 100%;
 }
 
+.userNameBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: white;
+  background-color: #00b0e9;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+.userName {
+  width: 100px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin: 0 5px;
+}
+
+.editUserName {
+  width: 80%;
+  color: white;
+  background: inherit;
+  border: none;
+}
+
 .messageBox[disabled] {
   opacity: 0.5;
 }
@@ -28,7 +54,6 @@
 .messageInput {
   border: 1px #00b0e9 solid;
   padding: 10px;
-  border-radius: 3px;
   flex: 1;
 }
 
@@ -36,9 +61,9 @@
   color: white;
   background-color: #00b0e9;
   border: none;
-  border-radius: 3px;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
   text-align: center;
-  margin: 0 5px;
   padding: 11px;
   cursor: pointer;
 }
