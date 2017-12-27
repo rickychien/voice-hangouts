@@ -1,9 +1,10 @@
-export function addMessage(uid, message) {
+export function addMessage(uid, message, timestamp) {
   return {
     type: 'ADD_MESSAGE',
     payload: {
       uid,
       message,
+      timestamp: new Date(timestamp),
     },
   };
 }

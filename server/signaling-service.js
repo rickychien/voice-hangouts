@@ -28,15 +28,16 @@ class SignalingService {
     });
   }
 
-  broadcastToRoomPeers(type, ws, payload) {
+  broadcastToRoomPeers(type, ws, payload, includeSelf) {
     this.wsClients.forEach((wsClient) => {
-      if (wsClient.roomName === ws.roomName && wsClient.uid !== ws.uid) {
+      if (wsClient.roomName === ws.roomName && (includeSelf || wsClient.uid !== ws.uid)) {
         this.send(wsClient, {
           type,
           payload: {
             peerId: ws.uid,
             userName: ws.userName,
             roomName: ws.roomName,
+            timestamp: new Date(),
             ...payload,
           },
         });
@@ -85,15 +86,15 @@ class SignalingService {
   }
 
   onClientMessage(ws, payload) {
-    this.broadcastToRoomPeers('message', ws, payload);
+    this.broadcastToRoomPeers('message', ws, payload, true);
   }
 
   onClientUpdate(ws, payload) {
-    this.broadcastToRoomPeers('update', ws, payload);
+    this.broadcastToRoomPeers('update', ws, payload, false);
   }
 
   onClientLeave(ws) {
-    this.broadcastToRoomPeers('peer left', ws);
+    this.broadcastToRoomPeers('peer left', ws, {}, false);
   }
 }
 

@@ -38,7 +38,6 @@ class Room extends React.PureComponent {
     const { addMessage, connector, user } = this.props;
 
     if ((key === 'Enter' || type === 'click') && message) {
-      addMessage(user.uid, message);
       connector.sendMessage(message);
       this.setState({ message: '' });
     }
@@ -64,8 +63,16 @@ class Room extends React.PureComponent {
           {
             messages.map((msg) =>
               (
-                <div key={ msg.mid }>
-                  {`${this.getUserName(msg.uid)}: ${msg.message}`}
+                <div key={ msg.mid } className={ styles.messageRow }>
+                  <span>
+                    {`${this.getUserName(msg.uid)}: ${msg.message}`}
+                  </span>
+                  <span
+                    className={ styles.timestamp }
+                    title={ msg.timestamp.toLocaleDateString() }
+                  >
+                    {`${msg.timestamp.toLocaleTimeString()}`}
+                  </span>
                 </div>
               ),
             )

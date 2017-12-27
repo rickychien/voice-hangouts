@@ -34,7 +34,7 @@ export default function (state = initialState, { type, payload }) {
       return { ...state, ...{ user: mergeUser(state.user, payload.user) }};
     }
     case 'ADD_MESSAGE': {
-      const { uid, message } = payload;
+      const { uid, message, timestamp } = payload;
       mid += 1;
       return {
         ...state,
@@ -42,6 +42,7 @@ export default function (state = initialState, { type, payload }) {
           mid,
           uid,
           message,
+          timestamp,
         }],
       };
     }

@@ -233,8 +233,8 @@ class Connector {
     if (err) throw err;
   }
 
-  handleMessage({ peerId, message }) {
-    this.actions.addMessage(peerId, message);
+  handleMessage({ peerId, message, timestamp }) {
+    this.actions.addMessage(peerId, message, timestamp);
   }
 
   handleUpdate({ user: { uid, userName }}) {
