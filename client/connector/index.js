@@ -140,7 +140,7 @@ class Connector {
     return this.stream;
   }
 
-  async handleJoined({ uid, userName, roomName }) {
+  handleJoined({ uid, userName, roomName }) {
     log(`User '${userName}' (${uid}) has joined room '${roomName}'`);
 
     this.actions.setUser({ uid, userName, roomName });
@@ -247,25 +247,35 @@ class Connector {
     this.actions.deleteClient(peerId);
   }
 
-  joinRoom(roomName) {
-    const user = this.getUser() || {};
+  joinRoom() {
+    const { uid, userName, roomName } = this.getUser() || {};
 
     this.send({
       type: 'join',
       payload: {
-        roomName: roomName || user.roomName,
-        uid: user.uid,
+        uid,
+        userName,
+        roomName,
       },
     });
   }
 
   leaveRoom() {
+    const { user: { uid, userName, roomName }} = this.store.getState();
+
     this.send({
       type: 'leave',
       payload: {
-        uid: this.store.getState().user.uid,
+        uid,
       },
     });
+
+    // Store user data in localStorage for next time visit
+    window.localStorage.setItem(roomName, JSON.stringify({
+      uid,
+      userName,
+      roomName,
+    }));
 
     this.actions.setUser({});
 
