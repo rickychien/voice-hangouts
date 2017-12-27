@@ -1,0 +1,40 @@
+.room {
+  width: 85%;
+  height: 100%;
+  max-width: 800px;
+  margin: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.messages {
+  width: 100%;
+  flex: 1;
+  text-align: start;
+}
+
+.messageBox {
+  display: flex;
+  width: 100%;
+}
+
+.messageInput {
+  border: 1px #00b0e9 solid;
+  padding: 10px;
+  border-radius: 3px;
+  flex: 1;
+}
+
+.sendButton {
+  color: white;
+  background-color: #00b0e9;
+  border: none;
+  border-radius: 3px;
+  text-align: center;
+  margin: 0 5px;
+  padding: 11px;
+  cursor: pointer;
+}

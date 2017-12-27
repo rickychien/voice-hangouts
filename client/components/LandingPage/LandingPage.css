@@ -1,0 +1,31 @@
+.domain {
+  color: #b7c0c3;
+}
+
+.startChatForm {
+  display: flex;
+  margin: 20px;
+}
+
+.createRoomInput {
+  border: 1px #00b0e9 solid;
+  padding: 10px;
+  border-radius: 3px;
+}
+
+.roomNameInput {
+  width: 100px;
+  border: none;
+  color: #00b0e9;
+}
+
+.startChatButton {
+  color: white;
+  background-color: #00b0e9;
+  border: none;
+  border-radius: 3px;
+  text-align: center;
+  margin: 0 5px;
+  padding: 11px;
+  cursor: pointer;
+}

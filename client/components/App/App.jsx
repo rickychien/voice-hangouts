@@ -3,22 +3,19 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import Actions from '../../actions';
+import LandingPage from '../LandingPage';
+import Room from '../Room';
 
 import styles from './App.css';
-
-const DOMAIN_URL = 'voice-hangouts.herokuapp.com/';
 
 class App extends React.PureComponent {
   static propTypes = {
     connector: PropTypes.object.isRequired,
-    clients: PropTypes.object.isRequired,
-    messages: PropTypes.array.isRequired,
     user: PropTypes.object.isRequired,
     addMessage: PropTypes.func.isRequired,
   };
 
   state = {
-    roomName: '',
     message: '',
   };
 
@@ -28,10 +25,6 @@ class App extends React.PureComponent {
 
   componentWillUnmount() {
     window.removeEventListener(this.onLeaveRoom);
-  }
-
-  onJoinRoom = () => {
-    this.props.connector.connect(this.state.roomName || 'ballroom');
   }
 
   onLeaveRoom = () => {
@@ -44,12 +37,6 @@ class App extends React.PureComponent {
   onInputChange = (evt) => {
     const { target: { name, value } } = evt;
     this.setState({ [name]: value });
-  }
-
-  onRoomNameKeyPress = (evt) => {
-    if (evt.key === 'Enter') {
-      this.onJoinRoom();
-    }
   }
 
   onSendMessage = (evt) => {
@@ -65,67 +52,13 @@ class App extends React.PureComponent {
   }
 
   render() {
-    const { user, messages, clients } = this.props;
-    const { message, roomName } = this.state;
+    const { user, connector } = this.props;
 
     return (
       <div className={ styles.app }>
         <h1 className={ styles.appTitle }>Voice Hangouts</h1>
-        <p>Truly lightweight audio-only WebRTC chat</p>
         {
-          !user.uid ?
-            <div className={ styles.startChatForm }>
-              <span className={ styles.createRoomInput }>
-                <span className={ styles.domain }>{ DOMAIN_URL }</span>
-                <input
-                  autoFocus
-                  className={ styles.roomNameInput }
-                  name="roomName"
-                  placeholder="room"
-                  value={ roomName }
-                  onChange={ this.onInputChange }
-                  onKeyPress={ this.onRoomNameKeyPress }
-                />
-              </span>
-              <input
-                className={ styles.startChatButton }
-                type="submit"
-                value="Go"
-                onClick={ this.onJoinRoom }
-              />
-            </div>
-         :
-            <div className={ styles.app }>
-              <div className={ styles.roomTitle }>Room <strong>{ roomName }</strong></div>
-              <div className={ styles.messages }>
-                {
-                  messages.map((msg) =>
-                    (
-                      <div key={ msg.mid }>
-                        { `${msg.userName}: ${msg.message}` }
-                      </div>
-                    ),
-                  )
-                }
-              </div>
-              <input
-                className={ styles.messageInput }
-                name="message"
-                placeholder="type message here..."
-                value={ message }
-                onChange={ this.onInputChange }
-                onKeyPress={ this.onSendMessage }
-              />
-              {
-                Array.from(clients).filter(([, peer]) => peer.stream).map(([id, peer]) => (
-                  <audio
-                    key={ id }
-                    autoPlay
-                    src={ peer.stream }
-                  />
-                ))
-              }
-            </div>
+          !user.uid ? <LandingPage connector={ connector } /> : <Room connector={ connector } />
         }
       </div>
     );
