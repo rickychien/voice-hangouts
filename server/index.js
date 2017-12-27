@@ -14,10 +14,10 @@ const wsRouter = new Router();
 const PORT = process.env.PORT || 3000;
 
 router.get('/*', async (ctx) => {
-  await send(ctx, ctx.path, { index: 'index.html', root: `${config.output.path}` });
+  await send(ctx, '/', { index: 'index.html', root: `${config.output.path}` });
 });
 
-wsRouter.get('/', (ctx) => {
+wsRouter.get('/*', (ctx) => {
   const signalingService = new SignalingService(app.ws.server.clients);
   const { websocket } = ctx;
   websocket.on('message', (message) => {

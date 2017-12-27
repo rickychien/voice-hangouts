@@ -14,10 +14,6 @@ class LandingPage extends React.PureComponent {
     roomName: '',
   };
 
-  onJoinRoom = () => {
-    this.props.connector.connect(this.state.roomName || 'ballroom');
-  }
-
   onInputChange = (evt) => {
     const { target: { name, value } } = evt;
     this.setState({ [name]: value });
@@ -25,8 +21,14 @@ class LandingPage extends React.PureComponent {
 
   onRoomNameKeyPress = (evt) => {
     if (evt.key === 'Enter') {
-      this.onJoinRoom();
+      this.joinRoom();
     }
+  }
+
+  joinRoom = () => {
+    const roomName = this.state.roomName || 'Ballroom';
+    this.props.connector.joinRoom(roomName);
+    window.location.pathname = `/${roomName}`;
   }
 
   render() {
@@ -51,7 +53,7 @@ class LandingPage extends React.PureComponent {
           className={ styles.startChatButton }
           type="submit"
           value="Go"
-          onClick={ this.onJoinRoom }
+          onClick={ this.joinRoom }
         />
       </div>,
     ];

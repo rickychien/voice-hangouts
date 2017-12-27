@@ -7,17 +7,16 @@ class Connector {
     this.store = store;
   }
 
-  connect(roomName, userName) {
+  connect() {
     let ws = this.ws = new WebSocket(this.url);
 
     ws.addEventListener('open', () => {
       log('Signaling server connection success');
-      this.joinRoom(roomName, userName);
     });
 
     ws.addEventListener('close', () => {
       log("Websocket is closed, reconnecting...");
-      this.connect(roomName, userName);
+      this.connect();
     });
 
     ws.addEventListener('error', () => {
@@ -226,23 +225,25 @@ class Connector {
     this.actions.deleteClient(peerId);
   }
 
-  joinRoom(roomName, userName) {
-    // Notify server a join event
-    this.send({
-      type: 'join',
-      payload: {
-        roomName,
-        userName,
-      },
+  joinRoom(roomName) {
+    this.ws.addEventListener('open', () => {
+      this.send({
+        type: 'join',
+        payload: {
+          roomName,
+        },
+      });
     });
   }
 
   leaveRoom() {
-    this.send({
-      type: 'leave',
-      payload: {
-        uid: this.store.getState().user.uid,
-      },
+    this.ws.addEventListener('open', () => {
+      this.send({
+        type: 'leave',
+        payload: {
+          uid: this.store.getState().user.uid,
+        },
+      });
     });
 
     this.actions.setUser({});
@@ -255,7 +256,6 @@ class Connector {
   }
 
   sendMessage(message) {
-    // Notify server a message event
     this.send({
       type: 'message',
       payload: {

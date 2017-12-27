@@ -24,7 +24,7 @@ class SignalingService {
         });
       }
 
-      console.info(`[Send] '${ws.userName}' sent '${type}' to user '${wsClient.userName}'`);
+      console.info(`[Send] '${ws.uid}' sent '${type}' to user '${peerId}'`);
     });
   }
 
@@ -43,7 +43,7 @@ class SignalingService {
       }
     });
 
-    console.info(`[Broadcast] '${ws.userName}' broadcasted '${type}' to all peers in room '${ws.roomName}'.`);
+    console.info(`[Broadcast] '${ws.uid}' broadcasted '${type}' to all peers in room '${ws.roomName}'.`);
   }
 
   onMessage(ws, message) {

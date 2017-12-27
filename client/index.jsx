@@ -9,7 +9,7 @@ import configureStore from './store';
 import Connector from './connector';
 import App from './components/App';
 
-const HOST = window.location.origin.replace(/^http/, 'ws');
+const HOST = window.location.href.replace(/^http/, 'ws');
 
 const store = configureStore();
 const actions = bindActionCreators(Actions, store.dispatch);
