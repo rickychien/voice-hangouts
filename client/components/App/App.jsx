@@ -12,7 +12,6 @@ const roomName = window.location.pathname.replace('/', '');
 class App extends React.PureComponent {
   static propTypes = {
     connector: PropTypes.object.isRequired,
-    user: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
@@ -32,10 +31,7 @@ class App extends React.PureComponent {
   }
 
   leaveRoom = () => {
-    const { user } = this.props;
-    if (user.uid) {
-      this.props.connector.leaveRoom(user.uid);
-    }
+    this.props.connector.leaveRoom();
   }
 
   render() {
@@ -52,8 +48,4 @@ class App extends React.PureComponent {
   }
 }
 
-export default connect(
-  (state) => ({
-    user: state.user,
-  }),
-)(App);
+export default App;

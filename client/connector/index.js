@@ -67,7 +67,14 @@ class Connector {
   }
 
   send(data) {
-    this.ws.send(JSON.stringify(data));
+    if (this.ws.readyState === this.ws.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    } else {
+      this.ws.addEventListener('open', function sendData() {
+        this.ws.send(JSON.stringify(data));
+        this.ws.removeEventListener('open', sendData);
+      }.bind(this));
+    }
   }
 
   getUser() {
@@ -235,25 +242,21 @@ class Connector {
   joinRoom(roomName) {
     const user = this.getUser() || {};
 
-    this.ws.addEventListener('open', () => {
-      this.send({
-        type: 'join',
-        payload: {
-          roomName: roomName || user.roomName,
-          uid: user.uid,
-        },
-      });
+    this.send({
+      type: 'join',
+      payload: {
+        roomName: roomName || user.roomName,
+        uid: user.uid,
+      },
     });
   }
 
   leaveRoom() {
-    this.ws.addEventListener('open', () => {
-      this.send({
-        type: 'leave',
-        payload: {
-          uid: this.store.getState().user.uid,
-        },
-      });
+    this.send({
+      type: 'leave',
+      payload: {
+        uid: this.store.getState().user.uid,
+      },
     });
 
     this.actions.setUser({});
