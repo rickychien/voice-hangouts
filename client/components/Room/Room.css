@@ -64,9 +64,11 @@
 }
 
 .messageRow {
+  height: 20px;
   margin: 6px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .messageUser {
