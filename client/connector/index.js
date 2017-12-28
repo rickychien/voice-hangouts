@@ -303,6 +303,12 @@ class Connector {
       },
     });
   }
+
+  async toggleMediaStream() {
+    const stream = await this.getUserMedia();
+    stream.getAudioTracks()[0].enabled = !stream.getAudioTracks()[0].enabled;
+    console.log(stream.getAudioTracks()[0].enabled)
+  }
 }
 
 export default Connector;

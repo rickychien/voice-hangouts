@@ -44,8 +44,15 @@ class Room extends React.PureComponent {
     }
   }
 
-  onSpeakerClick = ({ target }) => {
-    this.props.toggleUserAudio(target.dataset.uid);
+  onUserControlClick = ({ target }) => {
+    const { connector, user } = this.props;
+    const { uid } = target.dataset;
+
+    if (uid === user.uid) {
+      connector.toggleMediaStream();
+    }
+
+    this.props.toggleUserAudio(uid);
   }
 
   getUserControlIcon = (uid, mute) => {
@@ -84,7 +91,7 @@ class Room extends React.PureComponent {
               <div key={ user.uid } className={ styles.userListRow }>
                 <button
                   className={ styles.userControlIcon }
-                  onClick={ this.onSpeakerClick }
+                  onClick={ this.onUserControlClick }
                   data-uid= { user.uid }
                   data-mute={ user.mute }
                 >
