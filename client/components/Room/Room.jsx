@@ -73,7 +73,7 @@ class Room extends React.PureComponent {
   render() {
     const { chatRoomReady, clients, messages, user } = this.props;
     const { message } = this.state;
-    const users = [user, ...Array.from(clients.values())];
+    const users = [user, ...Array.from(clients.values())].filter(user => user.uid);
 
     return (
       <div className={ styles.room }>
