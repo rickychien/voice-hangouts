@@ -1,3 +1,11 @@
+.landingPage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
 .domain {
   color: #b7c0c3;
 }

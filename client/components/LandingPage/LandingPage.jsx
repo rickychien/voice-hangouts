@@ -34,30 +34,32 @@ class LandingPage extends React.PureComponent {
   render() {
     const { roomName } = this.state;
 
-    return [
-      <h1>Voice Hangouts</h1>,
-      <p key="subtitle">Truly lightweight audio-only WebRTC chat</p>,
-      <div key="form" className={ styles.startChatForm }>
-        <span className={ styles.createRoomInput }>
-          <span className={ styles.domain }>{ DOMAIN_URL }</span>
-          <input
-            autoFocus
-            className={ styles.roomNameInput }
-            name="roomName"
-            placeholder="room"
-            value={ roomName }
-            onChange={ this.onInputChange }
-            onKeyPress={ this.onRoomNameKeyPress }
-          />
-        </span>
-        <input
-          className={ styles.startChatButton }
-          type="submit"
-          value="Go"
-          onClick={ this.joinRoom }
-        />
-      </div>,
-    ];
+    return (
+      <div className={ styles.landingPage }>
+        <h1>Voice Hangouts</h1>
+        <p key="subtitle">Truly lightweight audio-only WebRTC chat</p>
+        <div key="form" className={ styles.startChatForm }>
+            <span className={ styles.createRoomInput }>
+              <span className={ styles.domain }>{ DOMAIN_URL }</span>
+              <input
+                autoFocus
+                className={ styles.roomNameInput }
+                name="roomName"
+                placeholder="room"
+                value={ roomName }
+                onChange={ this.onInputChange }
+                onKeyPress={ this.onRoomNameKeyPress }
+              />
+            </span>
+            <input
+              className={ styles.startChatButton }
+              type="submit"
+              value="Go"
+              onClick={ this.joinRoom }
+            />
+          </div>
+      </div>
+    )
   }
 }
 
