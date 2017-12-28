@@ -64,16 +64,19 @@
 }
 
 .messageRow {
-  height: 20px;
+  line-height: 22px;
   margin: 6px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .messageUser {
-  margin-right: 5px;
   color: #2756b1;
+}
+
+.messageContent {
+  margin: 0 8px;
+  flex: 1;
+  word-break: break-all;
 }
 
 .timestamp {

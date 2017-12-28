@@ -105,25 +105,23 @@ class Room extends React.PureComponent {
               messages.map((msg) =>
                 (
                   <div key={ msg.mid } className={ styles.messageRow }>
-                    <span>
-                      <span className={ styles.messageUser }>
-                        { `${this.getUserName(msg.uid)}:` }
-                      </span>
-                      <span>
-                        {
-                          !this.isUrl(msg.message) ?
-                            msg.message
-                          :
-                            <a target="_blank" href={ msg.message }>{ msg.message }</a>
-                        }
-                      </span>
-                    </span>
-                    <span
+                    <div className={ styles.messageUser }>
+                      { `${this.getUserName(msg.uid)}:` }
+                    </div>
+                    <div className={ styles.messageContent }>
+                      {
+                        !this.isUrl(msg.message) ?
+                          msg.message
+                        :
+                          <a target="_blank" href={ msg.message }>{ msg.message }</a>
+                      }
+                    </div>
+                    <div
                       className={ styles.timestamp }
                       title={ msg.timestamp.toLocaleDateString() }
                     >
                       { `${msg.timestamp.toLocaleTimeString()}` }
-                    </span>
+                    </div>
                   </div>
                 ),
               )
