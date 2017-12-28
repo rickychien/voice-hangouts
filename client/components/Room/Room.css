@@ -1,14 +1,50 @@
 .room {
   width: 85%;
   height: 100%;
-  max-width: 800px;
-  margin: auto;
+  max-width: 1000px;
+  margin: 10px auto;
   text-align: center;
   display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.userList {
+  width: 200px;
+  margin: 0 10px;
+  border-radius: 2px;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.userListRow {
+  text-align: start;
+  margin: 6px 8px;
+}
+
+.userListName {
+  vertical-align: middle;
+}
+
+.userControlIcon {
+  margin: 0 5px;
+  border-radius: 2px;
+  border: none;
+  background-color: #e7e8e9;
+  cursor: pointer;
+}
+
+.userControlIcon:hover {
+  background-color: #939697;
+}
+
+.chatRoom {
+  border-radius: 2px;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  margin-bottom: 30px;
 }
 
 .messages {
@@ -27,6 +63,7 @@
 }
 
 .messageRow {
+  margin: 6px;
   display: flex;
   justify-content: space-between;
 }
@@ -55,8 +92,6 @@
   cursor: pointer;
   color: white;
   background-color: #00b0e9;
-  border-top-left-radius: 3px;
-  border-bottom-left-radius: 3px;
 }
 
 .userName {
@@ -88,8 +123,7 @@
   color: white;
   background-color: #00b0e9;
   border: none;
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
+  border-bottom-right-radius: 2px;
   text-align: center;
   padding: 11px;
   cursor: pointer;

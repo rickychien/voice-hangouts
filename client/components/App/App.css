@@ -15,22 +15,3 @@ p {
 *:focus {
   outline: none;
 }
-
-.app {
-  width: 85%;
-  height: 100%;
-  max-width: 800px;
-  margin: auto;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.appTitle {
-  text-align: center;
-  background: -webkit-linear-gradient(top,#fd0b58 0,#a32b68 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}

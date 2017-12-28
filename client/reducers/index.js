@@ -11,6 +11,7 @@ function mergeUser(state = {
   uid: '',
   userName: undefined,
   roomName: undefined,
+  mute: false,
 }, newState) {
   // Strip undefined properties
   Object.keys(newState).forEach((key) => !newState[key] && delete newState[key]);
@@ -22,6 +23,7 @@ function mergeClient(state = {
   userName: undefined,
   peerConn: undefined,
   stream: undefined,
+  mute: false,
 }, newState) {
   // Strip undefined properties
   Object.keys(newState).forEach((key) => !newState[key] && delete newState[key]);
@@ -56,6 +58,20 @@ export default function (state = initialState, { type, payload }) {
     }
     case 'SET_CHATROOM_READY': {
       return { ...state, ...{ chatRoomReady: payload.chatRoomReady } };
+    }
+    case 'TOGGLE_USER_AUDIO': {
+      if (state.user.uid === payload.uid) {
+        return { ...state, ...{ user: { ...state.user,  mute: !state.user.mute }}};
+      }
+
+      const client = state.clients.get(payload.uid);
+
+      if (client) {
+        client.mute = !client.mute;
+        return { ...state, ...{ clients: new Map(state.clients.set(payload.uid, client)) } };
+      }
+
+      return state;
     }
     default: {
       return state;

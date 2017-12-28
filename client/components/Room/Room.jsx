@@ -14,6 +14,7 @@ class Room extends React.PureComponent {
     messages: PropTypes.array.isRequired,
     user: PropTypes.object.isRequired,
     addMessage: PropTypes.func.isRequired,
+    toggleUserAudio: PropTypes.func.isRequired,
   };
 
   state = {
@@ -43,6 +44,18 @@ class Room extends React.PureComponent {
     }
   }
 
+  onSpeakerClick = ({ target }) => {
+    this.props.toggleUserAudio(target.dataset.uid);
+  }
+
+  getUserControlIcon = (uid, mute) => {
+    if (this.props.user.uid === uid) {
+      return !mute ? '\u{1F3A4}' : '\u{1F6AB}';
+    }
+
+    return !mute ? '\u{1F50A}' : '\u{1F507}';
+  }
+
   getUserName = (uid) => {
     const { clients, user } = this.props;
     if (uid === user.uid) {
@@ -60,63 +73,84 @@ class Room extends React.PureComponent {
   render() {
     const { chatRoomReady, clients, messages, user } = this.props;
     const { message } = this.state;
+    const users = [user, ...Array.from(clients.values())];
 
     return (
       <div className={ styles.room }>
-        <div className={ styles.messages }>
+        <div className={ styles.userList }>
+          <h3>Voice Hangouts</h3>
           {
-            messages.map((msg) =>
-              (
-                <div key={ msg.mid } className={ styles.messageRow }>
-                  <span>
-                    <span className={ styles.messageUser }>
-                      { `${this.getUserName(msg.uid)}:` }
-                    </span>
-                    <span>
-                      {
-                        !this.isUrl(msg.message) ?
-                          msg.message
-                        :
-                          <a target="_blank" href={ msg.message }>{ msg.message }</a>
-                      }
-                    </span>
-                  </span>
-                  <span
-                    className={ styles.timestamp }
-                    title={ msg.timestamp.toLocaleDateString() }
-                  >
-                    { `${msg.timestamp.toLocaleTimeString()}` }
-                  </span>
-                </div>
-              ),
-            )
+            users.map((user) => (
+              <div key={ user.uid } className={ styles.userListRow }>
+                <button
+                  className={ styles.userControlIcon }
+                  onClick={ this.onSpeakerClick }
+                  data-uid= { user.uid }
+                  data-mute={ user.mute }
+                >
+                  { this.getUserControlIcon(user.uid, user.mute) }
+                </button>
+                <span className={ styles.userListName }>{ user.userName }</span>
+              </div>
+            ))
           }
         </div>
-        <div className={ styles.messageBox } disabled={ !chatRoomReady }>
-          <div
-            className={ styles.userNameBox }
-            title="Click to edit your name"
-            onClick={ this.onEditUserName }
-          >
-            <span className={ styles.userName }>{ user.userName }</span>
+        <div className={ styles.chatRoom }>
+          <div className={ styles.messages }>
+            {
+              messages.map((msg) =>
+                (
+                  <div key={ msg.mid } className={ styles.messageRow }>
+                    <span>
+                      <span className={ styles.messageUser }>
+                        { `${this.getUserName(msg.uid)}:` }
+                      </span>
+                      <span>
+                        {
+                          !this.isUrl(msg.message) ?
+                            msg.message
+                          :
+                            <a target="_blank" href={ msg.message }>{ msg.message }</a>
+                        }
+                      </span>
+                    </span>
+                    <span
+                      className={ styles.timestamp }
+                      title={ msg.timestamp.toLocaleDateString() }
+                    >
+                      { `${msg.timestamp.toLocaleTimeString()}` }
+                    </span>
+                  </div>
+                ),
+              )
+            }
           </div>
-          <input
-            autoFocus
-            className={ styles.messageInput }
-            disabled={ !chatRoomReady }
-            name="message"
-            placeholder="type message here..."
-            value={ message }
-            onChange={ this.onInputChange }
-            onKeyPress={ this.onSendMessage }
-          />
-          <input
-            className={ styles.sendButton }
-            disabled={ !chatRoomReady }
-            type="submit"
-            value="Send"
-            onClick={ this.onSendMessage }
-          />
+          <div className={ styles.messageBox } disabled={ !chatRoomReady }>
+            <div
+              className={ styles.userNameBox }
+              title="Click to edit your name"
+              onClick={ this.onEditUserName }
+            >
+              <span className={ styles.userName }>{ user.userName }</span>
+            </div>
+            <input
+              autoFocus
+              className={ styles.messageInput }
+              disabled={ !chatRoomReady }
+              name="message"
+              placeholder="type message here..."
+              value={ message }
+              onChange={ this.onInputChange }
+              onKeyPress={ this.onSendMessage }
+            />
+            <input
+              className={ styles.sendButton }
+              disabled={ !chatRoomReady }
+              type="submit"
+              value="Send"
+              onClick={ this.onSendMessage }
+            />
+          </div>
         </div>
         {
           Array.from(clients).filter(([, peer]) => peer.stream).map(([id, peer]) => (
@@ -142,5 +176,6 @@ export default connect(
   (dispatch) => ({
     addMessage: (userName, message) => dispatch(Actions.addMessage(userName, message)),
     setUser: (payload) => dispatch(Actions.setUser(payload)),
+    toggleUserAudio: (uid) => dispatch(Actions.toggleUserAudio(uid)),
   }),
 )(Room);

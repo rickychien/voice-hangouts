@@ -35,6 +35,7 @@ class LandingPage extends React.PureComponent {
     const { roomName } = this.state;
 
     return [
+      <h1>Voice Hangouts</h1>,
       <p key="subtitle">Truly lightweight audio-only WebRTC chat</p>,
       <div key="form" className={ styles.startChatForm }>
         <span className={ styles.createRoomInput }>

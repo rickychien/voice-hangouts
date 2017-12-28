@@ -47,15 +47,7 @@ class App extends React.PureComponent {
 
   render() {
     const { connector } = this.props;
-
-    return (
-      <div className={ styles.app }>
-        <h1 className={ styles.appTitle }>Voice Hangouts</h1>
-        {
-          !roomName ? <LandingPage connector={ connector } /> : <Room connector={ connector } />
-        }
-      </div>
-    );
+    return !roomName ? <LandingPage connector={ connector } /> : <Room connector={ connector } />;
   }
 }
 

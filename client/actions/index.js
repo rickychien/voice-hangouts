@@ -1,4 +1,4 @@
-export function addMessage(uid, message, timestamp) {
+function addMessage(uid, message, timestamp) {
   return {
     type: 'ADD_MESSAGE',
     payload: {
@@ -9,7 +9,7 @@ export function addMessage(uid, message, timestamp) {
   };
 }
 
-export function setClient({ uid, userName, peerConn, stream }) {
+function setClient({ uid, userName, peerConn, stream }) {
   if (stream) {
     stream = URL.createObjectURL(stream);
   }
@@ -25,7 +25,7 @@ export function setClient({ uid, userName, peerConn, stream }) {
   };
 }
 
-export function deleteClient(uid) {
+function deleteClient(uid) {
   return {
     type: 'DELETE_CLIENT',
     payload: {
@@ -35,7 +35,7 @@ export function deleteClient(uid) {
 }
 
 
-export function setUser({ uid, userName, roomName }) {
+function setUser({ uid, userName, roomName }) {
   return {
     type: 'SET_USER',
     payload: {
@@ -48,11 +48,20 @@ export function setUser({ uid, userName, roomName }) {
   };
 }
 
-export function setChatRoomReady(chatRoomReady) {
+function setChatRoomReady(chatRoomReady) {
   return {
     type: 'SET_CHATROOM_READY',
     payload: {
       chatRoomReady,
+    },
+  };
+}
+
+function toggleUserAudio(uid) {
+  return {
+    type: 'TOGGLE_USER_AUDIO',
+    payload: {
+      uid,
     },
   };
 }
@@ -63,4 +72,5 @@ export default {
   deleteClient,
   setUser,
   setChatRoomReady,
+  toggleUserAudio,
 };
