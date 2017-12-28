@@ -304,10 +304,10 @@ class Connector {
     });
   }
 
-  async toggleMediaStream() {
-    const stream = await this.getUserMedia();
+  async toggleMediaStream(uid) {
+    const stream = uid === this.getUser().uid ?
+      await this.getUserMedia() : this.getClient(uid).peerConn.getRemoteStreams()[0];
     stream.getAudioTracks()[0].enabled = !stream.getAudioTracks()[0].enabled;
-    console.log(stream.getAudioTracks()[0].enabled)
   }
 }
 

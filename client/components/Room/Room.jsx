@@ -48,10 +48,7 @@ class Room extends React.PureComponent {
     const { connector, user } = this.props;
     const { uid } = target.dataset;
 
-    if (uid === user.uid) {
-      connector.toggleMediaStream();
-    }
-
+    connector.toggleMediaStream(uid);
     this.props.toggleUserAudio(uid);
   }
 
