@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import FontAwesome from 'react-fontawesome';
+import faStyles from 'font-awesome/css/font-awesome.css';
 import { connect } from 'react-redux';
 
 import Actions from '../../actions';
@@ -60,10 +62,10 @@ class Room extends React.PureComponent {
 
   getUserControlIcon = (uid, mute) => {
     if (this.props.user.uid === uid) {
-      return !mute ? '\u{1F3A4}' : '\u{1F6AB}';
+      return !mute ? 'microphone' : 'microphone-slash';
     }
 
-    return !mute ? '\u{1F50A}' : '\u{1F507}';
+    return !mute ? 'volume-up' : 'volume-off';
   }
 
   getUserName = (uid) => {
@@ -92,15 +94,15 @@ class Room extends React.PureComponent {
           {
             users.map((user) => (
               <div key={ user.uid } className={ styles.userListRow }>
-                <button
+                <FontAwesome
                   className={ styles.userControlIcon }
                   onClick={ this.onUserControlClick }
-                  data-uid= { user.uid }
-                  data-mute={ user.mute }
                   disabled={ !user.stream }
-                >
-                  { this.getUserControlIcon(user.uid, user.mute) }
-                </button>
+                  cssModule={ faStyles }
+                  data-uid={ user.uid }
+                  data-mute={ user.mute }
+                  name={ this.getUserControlIcon(user.uid, user.mute) }
+                />
                 <span className={ styles.userListName }>{ user.userName }</span>
                 { user.stream && <VolumeMeter connector={ connector } stream={ user.stream } /> }
               </div>
