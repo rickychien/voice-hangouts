@@ -4,7 +4,7 @@ Voice hangouts with your friends
 
 ## Prerequisites
 
-* [node] >= 9.2.1
+* [node] >= 9.3.0
 * [npm] >= 5.6.0
 * [yarn] >= 1.3.2
 
