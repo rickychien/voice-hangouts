@@ -3,6 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import Actions from '../../actions';
+import VolumeMeter from '../VolumeMeter';
 
 import styles from './Room.css';
 
@@ -20,6 +21,11 @@ class Room extends React.PureComponent {
   state = {
     message: '',
   };
+
+  async componentDidMount() {
+    const stream = await this.props.connector.getUserMedia();
+    this.props.setUser({ stream });
+  }
 
   onEditUserName = () => {
     const { connector, setUser, user } = this.props;
@@ -75,7 +81,7 @@ class Room extends React.PureComponent {
   }
 
   render() {
-    const { chatRoomReady, clients, messages, user } = this.props;
+    const { chatRoomReady, clients, connector, messages, user } = this.props;
     const { message } = this.state;
     const users = [user, ...Array.from(clients.values())].filter(user => user.uid);
 
@@ -91,10 +97,12 @@ class Room extends React.PureComponent {
                   onClick={ this.onUserControlClick }
                   data-uid= { user.uid }
                   data-mute={ user.mute }
+                  disabled={ !user.stream }
                 >
                   { this.getUserControlIcon(user.uid, user.mute) }
                 </button>
                 <span className={ styles.userListName }>{ user.userName }</span>
+                { user.stream && <VolumeMeter connector={ connector } stream={ user.stream } /> }
               </div>
             ))
           }
@@ -155,11 +163,11 @@ class Room extends React.PureComponent {
           </div>
         </div>
         {
-          Array.from(clients).filter(([, peer]) => peer.stream).map(([id, peer]) => (
+          Array.from(clients).filter(([, peer]) => peer.streamUrl).map(([id, peer]) => (
             <audio
               key={ id }
               autoPlay
-              src={ peer.stream }
+              src={ peer.streamUrl }
             />
           ))
         }

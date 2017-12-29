@@ -129,7 +129,7 @@ class Connector {
     return peerConn;
   }
 
-  getUserMedia(fake) {
+  getUserMedia() {
     if (this.stream) {
       return this.stream;
     }
@@ -177,7 +177,7 @@ class Connector {
     });
 
     const [err, stream] = await to(this.getUserMedia());
-    if (err) throw err;
+    this.actions.setUser({ stream });
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
 
@@ -194,7 +194,7 @@ class Connector {
     if (err) throw err;
 
     [err, stream] = await to(this.getUserMedia());
-    if (err) throw err;
+    this.actions.setUser({ stream });
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
 
@@ -304,9 +304,9 @@ class Connector {
     });
   }
 
-  async toggleMediaStream(uid) {
-    const stream = uid === this.getUser().uid ?
-      await this.getUserMedia() : this.getClient(uid).peerConn.getRemoteStreams()[0];
+  toggleMediaStream(uid) {
+    const user = this.getUser();
+    const { stream } = uid === user.uid ? user : this.getClient(uid);
     stream.getAudioTracks()[0].enabled = !stream.getAudioTracks()[0].enabled;
   }
 }

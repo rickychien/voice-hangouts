@@ -11,6 +11,7 @@ function mergeUser(state = {
   uid: '',
   userName: undefined,
   roomName: undefined,
+  stream: undefined,
   mute: false,
 }, newState) {
   // Strip undefined properties
@@ -23,6 +24,7 @@ function mergeClient(state = {
   userName: undefined,
   peerConn: undefined,
   stream: undefined,
+  streamUrl: undefined,
   mute: false,
 }, newState) {
   // Strip undefined properties

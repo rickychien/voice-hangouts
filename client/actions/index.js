@@ -10,10 +10,6 @@ function addMessage(uid, message, timestamp) {
 }
 
 function setClient({ uid, userName, peerConn, stream }) {
-  if (stream) {
-    stream = URL.createObjectURL(stream);
-  }
-
   return {
     type: 'SET_CLIENT',
     payload: {
@@ -21,6 +17,7 @@ function setClient({ uid, userName, peerConn, stream }) {
       userName,
       peerConn,
       stream,
+      streamUrl: stream ? URL.createObjectURL(stream) : undefined,
     },
   };
 }
@@ -35,7 +32,7 @@ function deleteClient(uid) {
 }
 
 
-function setUser({ uid, userName, roomName }) {
+function setUser({ uid, userName, roomName, stream }) {
   return {
     type: 'SET_USER',
     payload: {
@@ -43,6 +40,7 @@ function setUser({ uid, userName, roomName }) {
         uid,
         userName,
         roomName,
+        stream,
       },
     },
   };

@@ -38,6 +38,15 @@
   background-color: #939697;
 }
 
+.userControlIcon[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.userControlIcon[disabled]:hover {
+  background-color: #e7e8e9;
+}
+
 .chatRoom {
   border-radius: 2px;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);

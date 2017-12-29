@@ -31,6 +31,7 @@
     "style-loader": "^0.19.0",
     "url-loader": "^0.6.2",
     "uuid": "^3.1.0",
+    "volume-meter": "^2.0.1",
     "webrtc-adapter": "^6.0.3"
   },
   "devDependencies": {
