@@ -53,7 +53,7 @@ class Room extends React.PureComponent {
   }
 
   onUserControlClick = ({ target }) => {
-    const { connector, user } = this.props;
+    const { connector } = this.props;
     const { uid } = target.dataset;
 
     connector.toggleMediaStream(uid);
@@ -92,19 +92,25 @@ class Room extends React.PureComponent {
         <div className={ styles.userList }>
           <h3>Voice Hangouts</h3>
           {
-            users.map((user) => (
-              <div key={ user.uid } className={ styles.userListRow }>
+            users.map(({ uid, userName, stream, mute }) => (
+              <div key={ uid } className={ styles.userListRow }>
                 <FontAwesome
                   className={ styles.userControlIcon }
                   onClick={ this.onUserControlClick }
-                  disabled={ !user.stream }
+                  disabled={ !stream }
                   cssModule={ faStyles }
-                  data-uid={ user.uid }
-                  data-mute={ user.mute }
-                  name={ this.getUserControlIcon(user.uid, user.mute) }
+                  data-uid={ uid }
+                  data-mute={ mute }
+                  name={ this.getUserControlIcon(uid, mute) }
                 />
-                <span className={ styles.userListName }>{ user.userName }</span>
-                { user.stream && <VolumeMeter connector={ connector } stream={ user.stream } /> }
+                <span className={ styles.userListName }>{ userName }</span>
+                {
+                  stream && <VolumeMeter
+                    connector={ connector }
+                    enabled={ !!stream && !mute }
+                    stream={ stream }
+                  />
+                }
               </div>
             ))
           }

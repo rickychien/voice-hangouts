@@ -7,6 +7,7 @@ import styles from './VolumeMeter.css';
 class VolumeMeter extends React.PureComponent {
   static propTypes = {
     connector: PropTypes.object.isRequired,
+    enabled: PropTypes.bool.isRequired,
     stream: PropTypes.object.isRequired,
   };
 
@@ -14,14 +15,14 @@ class VolumeMeter extends React.PureComponent {
     volume: 0,
   }
 
-  audioContext = new AudioContext();
-
   componentDidMount() {
     const { connector, stream } = this.props;
-    this.meter = volumeMeter(this.audioContext, { tweenIn: 2, tweenOut: 6 }, (volume) => {
-      this.setState({ volume });
+
+    const audioContext = new AudioContext();
+    this.meter = volumeMeter(audioContext, { tweenIn: 2, tweenOut: 6 }, (volume) => {
+      this.setState({ volume: this.props.enabled ? volume * 2 : 0 });
     });
-    const source = this.audioContext.createMediaStreamSource(stream);
+    const source = audioContext.createMediaStreamSource(stream);
     source.connect(this.meter);
   }
 
@@ -34,7 +35,7 @@ class VolumeMeter extends React.PureComponent {
     const { volume } = this.state;
 
     return (
-      <svg className={ styles.volumeMeter } width={ `${volume * 3}px` }>
+      <svg className={ styles.volumeMeter } width={ `${volume}px` }>
         <polygon points="0,20 25,0 25,20" />
       </svg>
     );
