@@ -161,11 +161,12 @@ class Room extends React.PureComponent {
               onChange={ this.onInputChange }
               onKeyPress={ this.onSendMessage }
             />
-            <input
+            <FontAwesome
               className={ styles.sendButton }
+              cssModule={ faStyles }
               disabled={ !chatRoomReady }
-              type="submit"
               value="Send"
+              name="paper-plane"
               onClick={ this.onSendMessage }
             />
           </div>
