@@ -29,7 +29,7 @@ Voice hangouts with your friends
   yarn install
   ```
 
-2. Start webpack dev server
+2. Start webpack development server
 
   ```
   yarn start
@@ -41,26 +41,25 @@ Voice hangouts with your friends
 
   Production build will exclude unnecessary resources (e.g. [redux-logger] only enable in development mode), minimizing resources and shipping production build libraries for real website experience.
 
-  ```
-  yarn build
-  ```
-
-  To check production result, just spinning up a local server under public folder. For example you can launch a python static file server in public folder by:
+1. Install packages by [npm] or [yarn]
 
   ```
-  python -m SimpleHTTPServer
+  yarn install
   ```
 
-  and visit <http://localhost:8000>
+2. Start production server
+
+  ```
+  NODE_ENV=production yarn start
+  ```
+
+3. Visit <http://localhost:3000> in browser
 
 #### Clean up artifact resources
+
   ```
   yarn clean
   ```
-
-## Application State Structure
-
-  TBD
 
 [node]: https://nodejs.org/
 [npm]: https://www.npmjs.com/
