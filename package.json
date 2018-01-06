@@ -14,7 +14,7 @@
     "clean": "rm -rf ./public/*.js",
     "lint": "$(npm bin)/eslint --fix '+(client|server)/**/*.+(js|jsx)'",
     "start": "node server/index.js",
-    "postinstall": "yarn build"
+    "heroku-postbuild": "yarn build"
   },
   "dependencies": {
     "css-loader": "^0.28.7",
