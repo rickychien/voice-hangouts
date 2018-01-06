@@ -1,7 +1,5 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import FontAwesome from 'react-fontawesome'
-import faStyles from 'font-awesome/css/font-awesome.css'
 import { connect } from 'react-redux'
 
 import Actions from '../../actions'
@@ -62,10 +60,10 @@ class Room extends React.PureComponent {
 
   getUserControlIcon = (uid, mute) => {
     if (this.props.user.uid === uid) {
-      return !mute ? 'microphone' : 'microphone-slash'
+      return !mute ? ' fas fa-microphone' : ' fas fa-microphone-slash'
     }
 
-    return !mute ? 'volume-up' : 'volume-off'
+    return !mute ? ' fas fa-volume-up' : ' fas fa-volume-off'
   }
 
   getUserName = (uid) => {
@@ -94,14 +92,12 @@ class Room extends React.PureComponent {
           {
             users.map(({ uid, userName, stream, mute }) => (
               <div key={uid} className={styles.userListRow}>
-                <FontAwesome
-                  className={styles.userControlIcon}
+                <i
+                  className={styles.userControlIcon + this.getUserControlIcon(uid, mute)}
                   onClick={this.onUserControlClick}
                   disabled={!stream}
-                  cssModule={faStyles}
                   data-uid={uid}
                   data-mute={mute}
-                  name={this.getUserControlIcon(uid, mute)}
                 />
                 <span className={styles.userListName}>{ userName }</span>
                 {
@@ -161,12 +157,10 @@ class Room extends React.PureComponent {
               onChange={this.onInputChange}
               onKeyPress={this.onSendMessage}
             />
-            <FontAwesome
-              className={styles.sendButton}
-              cssModule={faStyles}
+            <i
+              className={styles.sendButton + ' fab fa-telegram-plane'}
               disabled={!chatRoomReady}
               value='Send'
-              name='paper-plane'
               onClick={this.onSendMessage}
             />
           </div>
