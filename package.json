@@ -12,7 +12,7 @@
   "scripts": {
     "build": "yarn clean && NODE_ENV=production $(npm bin)/webpack --progress --colors --config ./webpack.config.js",
     "clean": "rm -rf ./public/*.js",
-    "lint": "$(npm bin)/eslint --fix '+(client|server)/**/*.+(js|jsx)'",
+    "lint": "$(npm bin)/eslint --fix '+(client|server)/**/*.+(js|jsx)' './*.js'",
     "start": "node server/index.js",
     "heroku-postbuild": "yarn build"
   },
