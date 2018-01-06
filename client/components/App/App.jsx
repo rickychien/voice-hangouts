@@ -11,7 +11,7 @@ import './App.css'
 const roomName = window.location.pathname.replace('/', '')
 
 class App extends React.PureComponent {
-  propTypes = {
+  static propTypes = {
     connector: PropTypes.object.isRequired,
     setUser: PropTypes.func.isRequired
   };
