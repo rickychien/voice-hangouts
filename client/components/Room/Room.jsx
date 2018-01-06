@@ -12,12 +12,12 @@ import styles from './Room.css';
 class Room extends React.PureComponent {
   static propTypes = {
     connector: PropTypes.object.isRequired,
-    clients: PropTypes.object.isRequired,
     chatRoomReady: PropTypes.bool.isRequired,
+    clients: PropTypes.object.isRequired,
     messages: PropTypes.array.isRequired,
-    user: PropTypes.object.isRequired,
-    addMessage: PropTypes.func.isRequired,
+    setUser: PropTypes.func.isRequired,
     toggleUserAudio: PropTypes.func.isRequired,
+    user: PropTypes.object.isRequired,
   };
 
   state = {
@@ -31,7 +31,7 @@ class Room extends React.PureComponent {
 
   onEditUserName = () => {
     const { connector, setUser, user } = this.props;
-    let userName = window.prompt('Edit your username:', this.props.user.userName);
+    const userName = window.prompt('Edit your username:', this.props.user.userName);
     setUser({ userName });
     connector.sendUpdate({ uid: user.uid, userName });
   }
@@ -44,7 +44,7 @@ class Room extends React.PureComponent {
   onSendMessage = (evt) => {
     const { key, type } = evt;
     const { message } = this.state;
-    const { addMessage, connector, user } = this.props;
+    const { connector } = this.props;
 
     if ((key === 'Enter' || type === 'click') && message) {
       connector.sendMessage(message);
@@ -79,13 +79,13 @@ class Room extends React.PureComponent {
   }
 
   isUrl(url) {
-    return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig.test(url);
+    return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig.test(url);
   }
 
   render() {
     const { chatRoomReady, clients, connector, messages, user } = this.props;
     const { message } = this.state;
-    const users = [user, ...Array.from(clients.values())].filter(user => user.uid);
+    const users = [user, ...Array.from(clients.values())].filter((client) => client.uid);
 
     return (
       <div className={ styles.room }>
@@ -144,13 +144,14 @@ class Room extends React.PureComponent {
             }
           </div>
           <div className={ styles.messageBox } disabled={ !chatRoomReady }>
-            <div
+            <button
               className={ styles.userNameBox }
               title="Click to edit your name"
               onClick={ this.onEditUserName }
+              onKeyPress={ this.onEditUserName }
             >
               <span className={ styles.userName }>{ user.userName }</span>
-            </div>
+            </button>
             <input
               autoFocus
               className={ styles.messageInput }

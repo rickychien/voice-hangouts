@@ -113,6 +113,8 @@
   cursor: pointer;
   color: white;
   background-color: #00b0e9;
+  border: none;
+  font: inherit;
 }
 
 .userName {

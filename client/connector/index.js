@@ -1,4 +1,4 @@
-import { log, to } from '../utils';
+import { log } from '../utils';
 
 class Connector {
   constructor(url, actions, store) {
@@ -8,24 +8,24 @@ class Connector {
   }
 
   connect() {
-    let ws = this.ws = new WebSocket(this.url);
+    this.ws = new WebSocket(this.url);
 
-    ws.addEventListener('open', () => {
+    this.ws.addEventListener('open', () => {
       log('Signaling server connection success');
       this.actions.setChatRoomReady(true);
     });
 
-    ws.addEventListener('close', () => {
-      log("Websocket is closed, reconnecting...");
+    this.ws.addEventListener('close', () => {
+      log('Websocket is closed, reconnecting...');
       this.connect();
       this.joinRoom();
     });
 
-    ws.addEventListener('error', () => {
+    this.ws.addEventListener('error', () => {
       log('Signaling server connection fail');
     });
 
-    ws.addEventListener('message', ({ data }) => {
+    this.ws.addEventListener('message', ({ data }) => {
       const { type, payload } = JSON.parse(data);
 
       switch (type) {
@@ -67,7 +67,7 @@ class Connector {
       }
     });
 
-    return ws;
+    return this.ws;
   }
 
   send(data) {
@@ -93,10 +93,10 @@ class Connector {
     const peerConn = new RTCPeerConnection({
       iceServers: [{
         urls: [
-          "stun:stun.l.google.com:19302",
-        ]
-      }
-    ]});
+          'stun:stun.l.google.com:19302',
+        ],
+      }],
+    });
 
     peerConn.addEventListener('icecandidate', ({ candidate }) => {
       if (candidate) {
@@ -119,7 +119,7 @@ class Connector {
       this.actions.setClient({ uid: peerId, stream: streams[0] });
     });
 
-    peerConn.addEventListener('error', (error) => {
+    peerConn.addEventListener('error', () => {
       log('Error when creating RTCPeerConnection');
     });
 
@@ -157,13 +157,9 @@ class Connector {
     const peerConn = this.getPeerConnection(peerId, userName);
 
     peerConn.addEventListener('negotiationneeded', async () => {
-      let err, offer;
+      const offer = await peerConn.createOffer();
 
-      [err, offer] = await to(peerConn.createOffer());
-      if (err) throw err;
-
-      [err] = await to(peerConn.setLocalDescription(offer));
-      if (err) throw err;
+      await peerConn.setLocalDescription(offer);
 
       this.send({
         type: 'offer',
@@ -176,7 +172,7 @@ class Connector {
       log(`Sent offer to '${userName}' (${peerId})`);
     });
 
-    const [err, stream] = await to(this.getUserMedia());
+    const stream = await this.getUserMedia();
     this.actions.setUser({ stream });
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
@@ -187,24 +183,20 @@ class Connector {
   async handleOffer({ peerId, userName, offer }) {
     log(`Received offer from '${userName}' (${peerId})`);
 
-    let err, answer, stream;
     const peerConn = this.getPeerConnection(peerId, userName);
 
-    [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(offer)));
-    if (err) throw err;
+    await peerConn.setRemoteDescription(new RTCSessionDescription(offer));
 
-    [err, stream] = await to(this.getUserMedia());
+    const stream = await this.getUserMedia();
     this.actions.setUser({ stream });
 
     stream.getTracks().forEach((track) => peerConn.addTrack(track, stream));
 
     log(`Sent local stream to remote user '${userName}' (${peerId})`);
 
-    [err, answer] = await to(peerConn.createAnswer());
-    if (err) throw err;
+    const answer = await peerConn.createAnswer();
 
-    [err] = await to(peerConn.setLocalDescription(answer));
-    if (err) throw err;
+    await peerConn.setLocalDescription(answer);
 
     this.send({
       type: 'answer',
@@ -220,24 +212,20 @@ class Connector {
   async handleAnswer({ peerId, userName, answer }) {
     log(`Received answer from '${userName}' (${peerId})`);
 
-    const { peerConn } = this.getClient(peerId);
-    const [err] = await to(peerConn.setRemoteDescription(new RTCSessionDescription(answer)));
-    if (err) throw err;
+    await this.getClient(peerId).peerConn.setRemoteDescription(new RTCSessionDescription(answer));
   }
 
   async handleCandidate({ peerId, userName, candidate }) {
     log(`Received ICE candidate from '${userName}' (${peerId})`);
 
-    const { peerConn } = this.getClient(peerId);
-    const [err] = await to(peerConn.addIceCandidate(new RTCIceCandidate(candidate)));
-    if (err) throw err;
+    await this.getClient(peerId).peerConn.addIceCandidate(new RTCIceCandidate(candidate));
   }
 
   handleMessage({ peerId, message, timestamp }) {
     this.actions.addMessage(peerId, message, timestamp);
   }
 
-  handleUpdate({ user: { uid, userName }}) {
+  handleUpdate({ user: { uid, userName } }) {
     this.actions.setClient({ uid, userName });
   }
 
@@ -261,7 +249,7 @@ class Connector {
   }
 
   leaveRoom() {
-    const { user: { uid, userName, roomName }} = this.store.getState();
+    const { user: { uid, userName, roomName } } = this.store.getState();
 
     this.send({
       type: 'leave',

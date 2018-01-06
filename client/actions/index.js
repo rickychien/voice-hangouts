@@ -31,7 +31,6 @@ function deleteClient(uid) {
   };
 }
 
-
 function setUser({ uid, userName, roomName, stream }) {
   return {
     type: 'SET_USER',

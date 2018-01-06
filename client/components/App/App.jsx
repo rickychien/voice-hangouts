@@ -6,7 +6,7 @@ import Actions from '../../actions';
 import LandingPage from '../LandingPage';
 import Room from '../Room';
 
-import styles from './App.css';
+import './App.css';
 
 const roomName = window.location.pathname.replace('/', '');
 

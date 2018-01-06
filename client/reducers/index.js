@@ -35,7 +35,7 @@ function mergeClient(state = {
 export default function (state = initialState, { type, payload }) {
   switch (type) {
     case 'SET_USER': {
-      return { ...state, ...{ user: mergeUser(state.user, payload.user) }};
+      return { ...state, ...{ user: mergeUser(state.user, payload.user) } };
     }
     case 'ADD_MESSAGE': {
       const { uid, message, timestamp } = payload;
@@ -63,7 +63,7 @@ export default function (state = initialState, { type, payload }) {
     }
     case 'TOGGLE_USER_AUDIO': {
       if (state.user.uid === payload.uid) {
-        return { ...state, ...{ user: { ...state.user,  mute: !state.user.mute }}};
+        return { ...state, ...{ user: { ...state.user, mute: !state.user.mute } } };
       }
 
       const client = state.clients.get(payload.uid);

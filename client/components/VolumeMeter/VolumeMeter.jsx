@@ -6,7 +6,6 @@ import styles from './VolumeMeter.css';
 
 class VolumeMeter extends React.PureComponent {
   static propTypes = {
-    connector: PropTypes.object.isRequired,
     enabled: PropTypes.bool.isRequired,
     stream: PropTypes.object.isRequired,
   };
@@ -16,7 +15,7 @@ class VolumeMeter extends React.PureComponent {
   }
 
   componentDidMount() {
-    const { connector, stream } = this.props;
+    const { stream } = this.props;
 
     const audioContext = new AudioContext();
     this.meter = volumeMeter(audioContext, { tweenIn: 2, tweenOut: 6 }, (volume) => {

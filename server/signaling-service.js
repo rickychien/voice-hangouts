@@ -56,7 +56,7 @@ class SignalingService {
     const { uid, userName, roomName } = payload;
 
     // Store the client
-    ws.uid = uid || uuidv4();;
+    ws.uid = uid || uuidv4();
     ws.userName = userName;
     ws.roomName = roomName;
 
