@@ -2,81 +2,81 @@ const initialState = {
   user: {},
   chatRoomReady: false,
   clients: new Map(),
-  messages: [],
-};
+  messages: []
+}
 
-let mid = 0;
+let mid = 0
 
-function mergeUser(state = {
+function mergeUser (state = {
   uid: '',
   userName: undefined,
   roomName: undefined,
   stream: undefined,
-  mute: false,
+  mute: false
 }, newState) {
   // Strip undefined properties
-  Object.keys(newState).forEach((key) => !newState[key] && delete newState[key]);
-  return { ...state, ...newState };
+  Object.keys(newState).forEach((key) => !newState[key] && delete newState[key])
+  return { ...state, ...newState }
 }
 
-function mergeClient(state = {
+function mergeClient (state = {
   uid: '',
   userName: undefined,
   peerConn: undefined,
   stream: undefined,
   streamUrl: undefined,
-  mute: false,
+  mute: false
 }, newState) {
   // Strip undefined properties
-  Object.keys(newState).forEach((key) => !newState[key] && delete newState[key]);
-  return { ...state, ...newState };
+  Object.keys(newState).forEach((key) => !newState[key] && delete newState[key])
+  return { ...state, ...newState }
 }
 
 export default function (state = initialState, { type, payload }) {
   switch (type) {
     case 'SET_USER': {
-      return { ...state, ...{ user: mergeUser(state.user, payload.user) } };
+      return { ...state, ...{ user: mergeUser(state.user, payload.user) } }
     }
     case 'ADD_MESSAGE': {
-      const { uid, message, timestamp } = payload;
-      mid += 1;
+      const { uid, message, timestamp } = payload
+      mid += 1
       return {
         ...state,
         messages: [...state.messages, {
           mid,
           uid,
           message,
-          timestamp,
-        }],
-      };
+          timestamp
+        }]
+      }
     }
     case 'SET_CLIENT': {
-      const client = mergeClient(state.clients.get(payload.uid), payload);
-      return { ...state, ...{ clients: new Map(state.clients.set(payload.uid, client)) } };
+      const client = mergeClient(state.clients.get(payload.uid), payload)
+      return { ...state, ...{ clients: new Map(state.clients.set(payload.uid, client)) } }
     }
     case 'DELETE_CLIENT': {
-      state.clients.delete(payload.uid);
-      return { ...state, ...{ clients: new Map(state.clients) } };
+      state.clients.delete(payload.uid)
+      return { ...state, ...{ clients: new Map(state.clients) } }
     }
     case 'SET_CHATROOM_READY': {
-      return { ...state, ...{ chatRoomReady: payload.chatRoomReady } };
+      return { ...state, ...{ chatRoomReady: payload.chatRoomReady } }
     }
     case 'TOGGLE_USER_AUDIO': {
       if (state.user.uid === payload.uid) {
-        return { ...state, ...{ user: { ...state.user, mute: !state.user.mute } } };
+        return { ...state, ...{ user: { ...state.user, mute: !state.user.mute } } }
       }
 
-      const client = state.clients.get(payload.uid);
+      const client = state.clients.get(payload.uid)
 
       if (client) {
-        client.mute = !client.mute;
-        return { ...state, ...{ clients: new Map(state.clients.set(payload.uid, client)) } };
+        client.mute = !client.mute
+        return { ...state, ...{ clients: new Map(state.clients.set(payload.uid, client)) } }
       }
 
-      return state;
+      return state
     }
     default: {
-      return state;
+      return state
     }
   }
 }

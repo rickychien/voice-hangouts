@@ -1,59 +1,59 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import { connect } from 'react-redux';
+import PropTypes from 'prop-types'
+import React from 'react'
+import { connect } from 'react-redux'
 
-import Actions from '../../actions';
-import LandingPage from '../LandingPage';
-import Room from '../Room';
+import Actions from '../../actions'
+import LandingPage from '../LandingPage'
+import Room from '../Room'
 
-import './App.css';
+import './App.css'
 
-const roomName = window.location.pathname.replace('/', '');
+const roomName = window.location.pathname.replace('/', '')
 
 class App extends React.PureComponent {
-  static propTypes = {
+  propTypes = {
     connector: PropTypes.object.isRequired,
-    setUser: PropTypes.func.isRequired,
+    setUser: PropTypes.func.isRequired
   };
 
-  componentDidMount() {
-    const { connector, setUser } = this.props;
+  componentDidMount () {
+    const { connector, setUser } = this.props
 
-    connector.connect();
+    connector.connect()
 
-    const userProfile = roomName && window.localStorage.getItem(roomName);
+    const userProfile = roomName && window.localStorage.getItem(roomName)
 
     if (userProfile) {
-      setUser(JSON.parse(userProfile));
+      setUser(JSON.parse(userProfile))
     } else {
-      setUser({ userName: 'Guest', roomName });
+      setUser({ userName: 'Guest', roomName })
     }
 
     // If url contains pathname, we treat it as a room name and join the room
     if (roomName) {
-      connector.joinRoom();
+      connector.joinRoom()
     }
 
-    window.addEventListener('beforeunload', this.leaveRoom);
+    window.addEventListener('beforeunload', this.leaveRoom)
   }
 
-  componentWillUnmount() {
-    window.removeEventListener(this.leaveRoom);
+  componentWillUnmount () {
+    window.removeEventListener(this.leaveRoom)
   }
 
   leaveRoom = () => {
-    this.props.connector.leaveRoom();
+    this.props.connector.leaveRoom()
   }
 
-  render() {
-    const { connector } = this.props;
-    return !roomName ? <LandingPage connector={ connector } /> : <Room connector={ connector } />;
+  render () {
+    const { connector } = this.props
+    return !roomName ? <LandingPage connector={connector} /> : <Room connector={connector} />
   }
 }
 
 export default connect(
   null,
   (dispatch) => ({
-    setUser: (payload) => dispatch(Actions.setUser(payload)),
-  }),
-)(App);
+    setUser: (payload) => dispatch(Actions.setUser(payload))
+  })
+)(App)

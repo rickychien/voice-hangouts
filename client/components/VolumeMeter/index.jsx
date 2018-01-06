@@ -1,1 +1,1 @@
-export { default } from './VolumeMeter';
+export { default } from './VolumeMeter'

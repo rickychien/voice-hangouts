@@ -12,6 +12,7 @@
   "scripts": {
     "build": "yarn clean && NODE_ENV=production $(npm bin)/webpack --progress --colors --config ./webpack.config.js",
     "clean": "rm -rf ./public/*.js",
+    "lint": "$(npm bin)/eslint --fix '+(client|server)/**/*.+(js|jsx)'",
     "start": "node server/index.js",
     "postinstall": "yarn build"
   },
@@ -44,10 +45,14 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "eslint": "^4.13.0",
-    "eslint-config-airbnb": "^16.1.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-config-standard-react": "^5.0.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-react": "^7.5.1",
+    "eslint-plugin-standard": "^3.0.1",
     "koa-convert": "^1.2.0",
     "koa-webpack-middleware": "^1.0.7",
     "uglifyjs-webpack-plugin": "^1.0.0-rc.0",

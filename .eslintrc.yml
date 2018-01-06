@@ -1,31 +1,5 @@
 parser: babel-eslint
-parserOptions:
-  ecmaFeatures:
-    jsx: true
-    experimentalObjectRestSpread: true
-extends: airbnb
-rules:
-  arrow-body-style: off
-  arrow-parens:
-    - error
-    - always
-  object-curly-newline: off
-  function-paren-newline: off
-  class-methods-use-this: off
-  no-case-declarations: off
-  no-param-reassign: off
-  no-console: off
-  no-alert: off
-  global-require: off
-  react/jsx-curly-spacing:
-    - error
-    - always
-  react/forbid-prop-types: off
-  react/prefer-stateless-function: off
-  jsx-a11y/no-autofocus: off
-  jsx-a11y/media-has-caption: off
-  import/no-extraneous-dependencies: [error, { devDependencies: true }]
-  import/no-named-as-default-member: off
+extends: ["standard", "standard-react"]
 env:
   browser: true
   mocha: true

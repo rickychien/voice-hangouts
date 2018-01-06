@@ -1,66 +1,66 @@
-import PropTypes from 'prop-types';
-import React from 'react';
+import PropTypes from 'prop-types'
+import React from 'react'
 
-import styles from './LandingPage.css';
+import styles from './LandingPage.css'
 
-const DOMAIN_URL = 'voice-hangouts.herokuapp.com/';
+const DOMAIN_URL = 'voice-hangouts.herokuapp.com/'
 
 class LandingPage extends React.PureComponent {
   static propTypes = {
-    connector: PropTypes.object.isRequired,
+    connector: PropTypes.object.isRequired
   };
 
   state = {
-    roomName: '',
+    roomName: ''
   };
 
   onInputChange = (evt) => {
-    const { target: { name, value } } = evt;
-    this.setState({ [name]: value });
+    const { target: { name, value } } = evt
+    this.setState({ [name]: value })
   }
 
   onRoomNameKeyPress = (evt) => {
     if (evt.key === 'Enter') {
-      this.joinRoom();
+      this.joinRoom()
     }
   }
 
   joinRoom = () => {
-    const roomName = this.state.roomName || 'Ballroom';
-    this.props.connector.joinRoom(roomName);
-    window.location.pathname = `/${roomName}`;
+    const roomName = this.state.roomName || 'Ballroom'
+    this.props.connector.joinRoom(roomName)
+    window.location.pathname = `/${roomName}`
   }
 
-  render() {
-    const { roomName } = this.state;
+  render () {
+    const { roomName } = this.state
 
     return (
-      <div className={ styles.landingPage }>
+      <div className={styles.landingPage}>
         <h1>Voice Hangouts</h1>
-        <p key="subtitle">Truly lightweight audio-only WebRTC chat</p>
-        <div key="form" className={ styles.startChatForm }>
-          <span className={ styles.createRoomInput }>
-            <span className={ styles.domain }>{ DOMAIN_URL }</span>
+        <p key='subtitle'>Truly lightweight audio-only WebRTC chat</p>
+        <div key='form' className={styles.startChatForm}>
+          <span className={styles.createRoomInput}>
+            <span className={styles.domain}>{ DOMAIN_URL }</span>
             <input
               autoFocus
-              className={ styles.roomNameInput }
-              name="roomName"
-              placeholder="room"
-              value={ roomName }
-              onChange={ this.onInputChange }
-              onKeyPress={ this.onRoomNameKeyPress }
+              className={styles.roomNameInput}
+              name='roomName'
+              placeholder='room'
+              value={roomName}
+              onChange={this.onInputChange}
+              onKeyPress={this.onRoomNameKeyPress}
             />
           </span>
           <input
-            className={ styles.startChatButton }
-            type="submit"
-            value="Go"
-            onClick={ this.joinRoom }
+            className={styles.startChatButton}
+            type='submit'
+            value='Go'
+            onClick={this.joinRoom}
           />
         </div>
       </div>
-    );
+    )
   }
 }
 
-export default LandingPage;
+export default LandingPage

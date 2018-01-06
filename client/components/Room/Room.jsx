@@ -1,13 +1,13 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import FontAwesome from 'react-fontawesome';
-import faStyles from 'font-awesome/css/font-awesome.css';
-import { connect } from 'react-redux';
+import PropTypes from 'prop-types'
+import React from 'react'
+import FontAwesome from 'react-fontawesome'
+import faStyles from 'font-awesome/css/font-awesome.css'
+import { connect } from 'react-redux'
 
-import Actions from '../../actions';
-import VolumeMeter from '../VolumeMeter';
+import Actions from '../../actions'
+import VolumeMeter from '../VolumeMeter'
 
-import styles from './Room.css';
+import styles from './Room.css'
 
 class Room extends React.PureComponent {
   static propTypes = {
@@ -17,172 +17,171 @@ class Room extends React.PureComponent {
     messages: PropTypes.array.isRequired,
     setUser: PropTypes.func.isRequired,
     toggleUserAudio: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired,
+    user: PropTypes.object.isRequired
   };
 
   state = {
-    message: '',
+    message: ''
   };
 
-  async componentDidMount() {
-    const stream = await this.props.connector.getUserMedia();
-    this.props.setUser({ stream });
+  async componentDidMount () {
+    const stream = await this.props.connector.getUserMedia()
+    this.props.setUser({ stream })
   }
 
   onEditUserName = () => {
-    const { connector, setUser, user } = this.props;
-    const userName = window.prompt('Edit your username:', this.props.user.userName);
-    setUser({ userName });
-    connector.sendUpdate({ uid: user.uid, userName });
+    const { connector, setUser, user } = this.props
+    const userName = window.prompt('Edit your username:', this.props.user.userName)
+    setUser({ userName })
+    connector.sendUpdate({ uid: user.uid, userName })
   }
 
   onInputChange = (evt) => {
-    const { target: { name, value } } = evt;
-    this.setState({ [name]: value });
+    const { target: { name, value } } = evt
+    this.setState({ [name]: value })
   }
 
   onSendMessage = (evt) => {
-    const { key, type } = evt;
-    const { message } = this.state;
-    const { connector } = this.props;
+    const { key, type } = evt
+    const { message } = this.state
+    const { connector } = this.props
 
     if ((key === 'Enter' || type === 'click') && message) {
-      connector.sendMessage(message);
-      this.setState({ message: '' });
+      connector.sendMessage(message)
+      this.setState({ message: '' })
     }
   }
 
   onUserControlClick = ({ target }) => {
-    const { connector } = this.props;
-    const { uid } = target.dataset;
+    const { connector } = this.props
+    const { uid } = target.dataset
 
-    connector.toggleMediaStream(uid);
-    this.props.toggleUserAudio(uid);
+    connector.toggleMediaStream(uid)
+    this.props.toggleUserAudio(uid)
   }
 
   getUserControlIcon = (uid, mute) => {
     if (this.props.user.uid === uid) {
-      return !mute ? 'microphone' : 'microphone-slash';
+      return !mute ? 'microphone' : 'microphone-slash'
     }
 
-    return !mute ? 'volume-up' : 'volume-off';
+    return !mute ? 'volume-up' : 'volume-off'
   }
 
   getUserName = (uid) => {
-    const { clients, user } = this.props;
+    const { clients, user } = this.props
     if (uid === user.uid) {
-      return user.userName;
+      return user.userName
     }
 
-    const client = clients.get(uid);
-    return client ? client.userName : 'Guest';
+    const client = clients.get(uid)
+    return client ? client.userName : 'Guest'
   }
 
-  isUrl(url) {
-    return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig.test(url);
+  isUrl (url) {
+    return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig.test(url)
   }
 
-  render() {
-    const { chatRoomReady, clients, connector, messages, user } = this.props;
-    const { message } = this.state;
-    const users = [user, ...Array.from(clients.values())].filter((client) => client.uid);
+  render () {
+    const { chatRoomReady, clients, connector, messages, user } = this.props
+    const { message } = this.state
+    const users = [user, ...Array.from(clients.values())].filter((client) => client.uid)
 
     return (
-      <div className={ styles.room }>
-        <div className={ styles.userList }>
+      <div className={styles.room}>
+        <div className={styles.userList}>
           <h3>Voice Hangouts</h3>
           {
             users.map(({ uid, userName, stream, mute }) => (
-              <div key={ uid } className={ styles.userListRow }>
+              <div key={uid} className={styles.userListRow}>
                 <FontAwesome
-                  className={ styles.userControlIcon }
-                  onClick={ this.onUserControlClick }
-                  disabled={ !stream }
-                  cssModule={ faStyles }
-                  data-uid={ uid }
-                  data-mute={ mute }
-                  name={ this.getUserControlIcon(uid, mute) }
+                  className={styles.userControlIcon}
+                  onClick={this.onUserControlClick}
+                  disabled={!stream}
+                  cssModule={faStyles}
+                  data-uid={uid}
+                  data-mute={mute}
+                  name={this.getUserControlIcon(uid, mute)}
                 />
-                <span className={ styles.userListName }>{ userName }</span>
+                <span className={styles.userListName}>{ userName }</span>
                 {
                   stream && <VolumeMeter
-                    connector={ connector }
-                    enabled={ !!stream && !mute }
-                    stream={ stream }
+                    connector={connector}
+                    enabled={!!stream && !mute}
+                    stream={stream}
                   />
                 }
               </div>
             ))
           }
         </div>
-        <div className={ styles.chatRoom }>
-          <div className={ styles.messages }>
+        <div className={styles.chatRoom}>
+          <div className={styles.messages}>
             {
               messages.map((msg) =>
                 (
-                  <div key={ msg.mid } className={ styles.messageRow }>
-                    <div className={ styles.messageUser }>
+                  <div key={msg.mid} className={styles.messageRow}>
+                    <div className={styles.messageUser}>
                       { `${this.getUserName(msg.uid)}:` }
                     </div>
-                    <div className={ styles.messageContent }>
+                    <div className={styles.messageContent}>
                       {
-                        !this.isUrl(msg.message) ?
-                          msg.message
-                        :
-                          <a target="_blank" href={ msg.message }>{ msg.message }</a>
+                        !this.isUrl(msg.message)
+                          ? msg.message
+                          : <a target='_blank' href={msg.message}>{ msg.message }</a>
                       }
                     </div>
                     <div
-                      className={ styles.timestamp }
-                      title={ msg.timestamp.toLocaleDateString() }
+                      className={styles.timestamp}
+                      title={msg.timestamp.toLocaleDateString()}
                     >
                       { `${msg.timestamp.toLocaleTimeString()}` }
                     </div>
                   </div>
-                ),
+                )
               )
             }
           </div>
-          <div className={ styles.messageBox } disabled={ !chatRoomReady }>
+          <div className={styles.messageBox} disabled={!chatRoomReady}>
             <button
-              className={ styles.userNameBox }
-              title="Click to edit your name"
-              onClick={ this.onEditUserName }
-              onKeyPress={ this.onEditUserName }
+              className={styles.userNameBox}
+              title='Click to edit your name'
+              onClick={this.onEditUserName}
+              onKeyPress={this.onEditUserName}
             >
-              <span className={ styles.userName }>{ user.userName }</span>
+              <span className={styles.userName}>{ user.userName }</span>
             </button>
             <input
               autoFocus
-              className={ styles.messageInput }
-              disabled={ !chatRoomReady }
-              name="message"
-              placeholder="type message here..."
-              value={ message }
-              onChange={ this.onInputChange }
-              onKeyPress={ this.onSendMessage }
+              className={styles.messageInput}
+              disabled={!chatRoomReady}
+              name='message'
+              placeholder='type message here...'
+              value={message}
+              onChange={this.onInputChange}
+              onKeyPress={this.onSendMessage}
             />
             <FontAwesome
-              className={ styles.sendButton }
-              cssModule={ faStyles }
-              disabled={ !chatRoomReady }
-              value="Send"
-              name="paper-plane"
-              onClick={ this.onSendMessage }
+              className={styles.sendButton}
+              cssModule={faStyles}
+              disabled={!chatRoomReady}
+              value='Send'
+              name='paper-plane'
+              onClick={this.onSendMessage}
             />
           </div>
         </div>
         {
           Array.from(clients).filter(([, peer]) => peer.streamUrl).map(([id, peer]) => (
             <audio
-              key={ id }
+              key={id}
               autoPlay
-              src={ peer.streamUrl }
+              src={peer.streamUrl}
             />
           ))
         }
       </div>
-    );
+    )
   }
 }
 
@@ -191,11 +190,11 @@ export default connect(
     clients: state.clients,
     chatRoomReady: state.chatRoomReady,
     messages: state.messages,
-    user: state.user,
+    user: state.user
   }),
   (dispatch) => ({
     addMessage: (userName, message) => dispatch(Actions.addMessage(userName, message)),
     setUser: (payload) => dispatch(Actions.setUser(payload)),
-    toggleUserAudio: (uid) => dispatch(Actions.toggleUserAudio(uid)),
-  }),
-)(Room);
+    toggleUserAudio: (uid) => dispatch(Actions.toggleUserAudio(uid))
+  })
+)(Room)
