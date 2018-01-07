@@ -13,8 +13,12 @@ const router = new Router()
 const wsRouter = new Router()
 const PORT = process.env.PORT || 3000
 
+function isStaticResource (url) {
+  return url === '/bundle.js' || url.includes('/assets/')
+}
+
 router.get('/*', async (ctx) => {
-  const path = ctx.path === '/bundle.js' ? ctx.path : '/'
+  const path = isStaticResource(ctx.path) ? ctx.path : '/'
   await send(ctx, path, { index: 'index.html', root: `${config.output.path}` })
 })
 

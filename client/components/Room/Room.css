@@ -2,11 +2,10 @@
   width: 85%;
   height: 100%;
   max-width: 1000px;
-  margin: 10px auto;
+  margin: 0 auto;
   text-align: center;
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
 }
 
 .userList {
@@ -30,6 +29,7 @@
   border-radius: 2px;
   border: none;
   background-color: #e7e8e9;
+  background-size: 22px;
   cursor: pointer;
   width: 30px;
   height: 30px;
@@ -37,7 +37,9 @@
   text-align: center;
   vertical-align: middle;
   font-size: 1.2rem;
-  color: rgb(85, 117, 136);
+  color: #557588;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .userControlIcon:hover {
@@ -51,6 +53,22 @@
 
 .userControlIcon[disabled]:hover {
   background-color: #e7e8e9;
+}
+
+.mic {
+  background-image: url(/assets/images/mic.svg);
+}
+
+.micOff {
+  background-image: url(/assets/images/mic_off.svg);
+}
+
+.volumeUp {
+  background-image: url(/assets/images/volume_up.svg);
+}
+
+.volumeOff {
+  background-image: url(/assets/images/volume_off.svg);
 }
 
 .chatRoom {
@@ -143,11 +161,13 @@
 }
 
 .sendButton {
-  color: white;
+  width: 40px;
+  background-image: url(/assets/images/send.svg);
+  background-repeat: no-repeat;
+  background-position: center;
   background-color: #00b0e9;
   border: none;
   border-bottom-right-radius: 2px;
   text-align: center;
-  padding: 12px;
   cursor: pointer;
 }

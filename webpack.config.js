@@ -43,10 +43,6 @@ module.exports = {
         exclude: /node_modules/
       },
       {
-        test: /\.(gif|svg|png|ttf|eot|jpe?g|woff2?)$/,
-        use: 'url-loader'
-      },
-      {
         test: /\.css$/,
         use: [
           'style-loader',
