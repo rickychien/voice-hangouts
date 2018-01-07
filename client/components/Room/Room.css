@@ -36,7 +36,7 @@
   line-height: 30px;
   text-align: center;
   vertical-align: middle;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: rgb(85, 117, 136);
 }
 
@@ -148,6 +148,6 @@
   border: none;
   border-bottom-right-radius: 2px;
   text-align: center;
-  padding: 12px 14px 12px 12px;
+  padding: 12px;
   cursor: pointer;
 }

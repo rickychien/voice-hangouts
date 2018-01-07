@@ -60,10 +60,10 @@ class Room extends React.PureComponent {
 
   getUserControlIcon = (uid, mute) => {
     if (this.props.user.uid === uid) {
-      return !mute ? ' fas fa-microphone' : ' fas fa-microphone-slash'
+      return !mute ? ' mic' : 'mic_off'
     }
 
-    return !mute ? ' fas fa-volume-up' : ' fas fa-volume-off'
+    return !mute ? ' volume_up' : ' volume_off'
   }
 
   getUserName = (uid) => {
@@ -93,12 +93,14 @@ class Room extends React.PureComponent {
             users.map(({ uid, userName, stream, mute }) => (
               <div key={uid} className={styles.userListRow}>
                 <i
-                  className={styles.userControlIcon + this.getUserControlIcon(uid, mute)}
+                  className={styles.userControlIcon + ' material-icons'}
                   onClick={this.onUserControlClick}
                   disabled={!stream}
                   data-uid={uid}
                   data-mute={mute}
-                />
+                >
+                  { this.getUserControlIcon(uid, mute) }
+                </i>
                 <span className={styles.userListName}>{ userName }</span>
                 {
                   stream && <VolumeMeter
@@ -158,11 +160,13 @@ class Room extends React.PureComponent {
               onKeyPress={this.onSendMessage}
             />
             <i
-              className={styles.sendButton + ' fab fa-telegram-plane'}
+              className={styles.sendButton + ' material-icons'}
               disabled={!chatRoomReady}
               value='Send'
-              onClick={this.onSendMessage}
-            />
+              onClick={this.onSndMessage}
+            >
+              send
+            </i>
           </div>
         </div>
         {
