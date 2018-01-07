@@ -1,5 +1,7 @@
 const webpack = require('webpack')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const WebpackCdnPlugin = require('webpack-cdn-plugin')
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -30,6 +32,24 @@ module.exports = {
         compress: true,
         comments: false
       }
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Voice Hangouts',
+      template: './client/index.template.html'
+    }),
+    !isDev && new WebpackCdnPlugin({
+      modules: [
+        {
+          name: 'react',
+          var: 'React'
+        },
+        {
+          name: 'react-dom',
+          var: 'ReactDOM'
+        }
+      ],
+      prod: true,
+      prodUrl: 'https://unpkg.com/:name@:version/umd/:name.production.min.js'
     })
   ].filter((file) => file),
   resolve: {
