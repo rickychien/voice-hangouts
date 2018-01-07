@@ -8,7 +8,7 @@ class VolumeMeter extends React.PureComponent {
   static propTypes = {
     enabled: PropTypes.bool.isRequired,
     stream: PropTypes.object.isRequired
-  };
+  }
 
   state = {
     volume: 0

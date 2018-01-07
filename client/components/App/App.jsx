@@ -14,7 +14,7 @@ class App extends React.PureComponent {
   static propTypes = {
     connector: PropTypes.object.isRequired,
     setUser: PropTypes.func.isRequired
-  };
+  }
 
   componentDidMount () {
     const { connector, setUser } = this.props

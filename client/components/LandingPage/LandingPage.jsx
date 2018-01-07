@@ -8,11 +8,11 @@ const DOMAIN_URL = 'voice-hangouts.herokuapp.com/'
 class LandingPage extends React.PureComponent {
   static propTypes = {
     connector: PropTypes.object.isRequired
-  };
+  }
 
   state = {
     roomName: ''
-  };
+  }
 
   onInputChange = (evt) => {
     const { target: { name, value } } = evt

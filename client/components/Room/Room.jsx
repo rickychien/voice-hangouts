@@ -16,11 +16,11 @@ class Room extends React.PureComponent {
     setUser: PropTypes.func.isRequired,
     toggleUserAudio: PropTypes.func.isRequired,
     user: PropTypes.object.isRequired
-  };
+  }
 
   state = {
     message: ''
-  };
+  }
 
   async componentDidMount () {
     const stream = await this.props.connector.getUserMedia()
