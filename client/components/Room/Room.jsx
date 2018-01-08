@@ -171,7 +171,7 @@ class Room extends React.PureComponent {
               className={styles.sendButton}
               disabled={!chatRoomReady}
               value='Send'
-              onClick={this.onSndMessage}
+              onClick={this.onSendMessage}
             />
           </div>
         </div>
