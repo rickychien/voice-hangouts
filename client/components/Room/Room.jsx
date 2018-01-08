@@ -23,8 +23,14 @@ class Room extends React.PureComponent {
   }
 
   async componentDidMount () {
-    const stream = await this.props.connector.getUserMedia()
+    const { connector } = this.props
+    const stream = await connector.getUserMedia()
     this.props.setUser({ stream })
+    window.addEventListener('beforeunload', this.onLeaveRoom)
+  }
+
+  componentWillUnmount () {
+    window.removeEventListener(this.onLeaveRoom)
   }
 
   onEditUserName = () => {
@@ -37,6 +43,10 @@ class Room extends React.PureComponent {
   onInputChange = (evt) => {
     const { target: { name, value } } = evt
     this.setState({ [name]: value })
+  }
+
+  onLeaveRoom = () => {
+    this.props.connector.leaveRoom()
   }
 
   onSendMessage = (evt) => {

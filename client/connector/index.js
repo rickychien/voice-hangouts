@@ -258,12 +258,14 @@ class Connector {
       }
     })
 
-    // Store user data in localStorage for next time visit
-    window.localStorage.setItem(roomName, JSON.stringify({
-      uid,
-      userName,
-      roomName
-    }))
+    if (roomName) {
+      // Store user data in localStorage for next time visit
+      window.localStorage.setItem(roomName, JSON.stringify({
+        uid,
+        userName,
+        roomName
+      }))
+    }
 
     this.actions.setUser({})
 

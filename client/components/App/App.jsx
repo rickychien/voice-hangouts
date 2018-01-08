@@ -19,8 +19,6 @@ class App extends React.PureComponent {
   componentDidMount () {
     const { connector, setUser } = this.props
 
-    connector.connect()
-
     const userProfile = roomName && window.localStorage.getItem(roomName)
 
     if (userProfile) {
@@ -31,18 +29,9 @@ class App extends React.PureComponent {
 
     // If url contains pathname, we treat it as a room name and join the room
     if (roomName) {
+      connector.connect()
       connector.joinRoom()
     }
-
-    window.addEventListener('beforeunload', this.leaveRoom)
-  }
-
-  componentWillUnmount () {
-    window.removeEventListener(this.leaveRoom)
-  }
-
-  leaveRoom = () => {
-    this.props.connector.leaveRoom()
   }
 
   render () {

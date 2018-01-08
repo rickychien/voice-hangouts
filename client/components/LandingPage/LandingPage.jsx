@@ -27,7 +27,9 @@ class LandingPage extends React.PureComponent {
 
   joinRoom = () => {
     const roomName = this.state.roomName || 'Ballroom'
-    this.props.connector.joinRoom(roomName)
+    const { connector } = this.props
+    connector.connect()
+    connector.joinRoom(roomName)
     window.location.pathname = `/${roomName}`
   }
 
