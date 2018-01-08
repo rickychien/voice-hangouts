@@ -111,7 +111,7 @@ class Room extends React.PureComponent {
                 />
                 <span className={styles.userListName}>{ userName }</span>
                 {
-                  false && <VolumeMeter
+                  stream && <VolumeMeter
                     connector={connector}
                     enabled={!!stream && !mute}
                     stream={stream}
