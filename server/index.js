@@ -26,7 +26,7 @@ router.get('*', (ctx, next) => {
     staticFiles.push('/bundle.js.map', '/__webpack_hmr')
   }
 
-  if (!staticFiles.includes(url)) {
+  if (!staticFiles.includes(url) && !url.includes('.hot-update')) {
     ctx.path = '/'
   }
 
