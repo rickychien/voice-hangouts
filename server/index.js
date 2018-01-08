@@ -13,13 +13,28 @@ const router = new Router()
 const wsRouter = new Router()
 const PORT = process.env.PORT || 3000
 
-function isStaticResource (url) {
-  return url === '/bundle.js' || url.includes('/assets/')
-}
+router.get('*', (ctx, next) => {
+  const url = ctx.path
 
-router.get('/*', async (ctx) => {
-  const path = isStaticResource(ctx.path) ? ctx.path : '/'
-  await send(ctx, path, { index: 'index.html', root: `${config.output.path}` })
+  if (url.includes('/assets/')) {
+    return send(ctx, url, { index: 'index.html', root: config.output.path })
+  }
+
+  const staticFiles = ['/', '/bundle.js']
+
+  if (isDev) {
+    staticFiles.push('/bundle.js.map', '/__webpack_hmr')
+  }
+
+  if (!staticFiles.includes(url)) {
+    ctx.path = '/'
+  }
+
+  if (isDev) {
+    return next()
+  }
+
+  return send(ctx, ctx.path, { index: 'index.html', root: config.output.path })
 })
 
 wsRouter.get('/*', (ctx) => {
@@ -30,8 +45,8 @@ wsRouter.get('/*', (ctx) => {
   })
 })
 
-app.ws
-  .use(wsRouter.routes())
+app.ws.use(wsRouter.routes())
+app.use(router.routes())
 
 if (isDev) {
   const webpack = require('webpack')
@@ -39,9 +54,7 @@ if (isDev) {
 
   const devMiddlewareConfig = {
     publicPath: config.output.publicPath,
-    stats: {
-      colors: true
-    }
+    stats: 'minimal'
   }
   const compiler = webpack(config)
 
@@ -50,6 +63,4 @@ if (isDev) {
     .use(convert(hotMiddleware(compiler)))
 }
 
-app
-  .use(router.routes())
-  .listen(PORT)
+app.listen(PORT)
