@@ -54,7 +54,7 @@ if (isDev) {
 
   const devMiddlewareConfig = {
     publicPath: config.output.publicPath,
-    stats: 'minimal'
+    stats: 'errors-only'
   }
   const compiler = webpack(config)
 
