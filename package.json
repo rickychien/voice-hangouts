@@ -13,7 +13,8 @@
     "build": "yarn clean && NODE_ENV=production $(npm bin)/webpack --progress --colors --config ./webpack.config.js",
     "clean": "find ./public -not -path '*/\\.*' -type f -maxdepth 1 -delete",
     "lint": "$(npm bin)/eslint --fix '+(client|server)/**/*.+(js|jsx)' './*.js'",
-    "start": "node server/index.js",
+    "start": "nodemon server/index.js",
+    "serve": "node server/index.js",
     "heroku-postbuild": "yarn build"
   },
   "dependencies": {
@@ -55,6 +56,7 @@
     "html-webpack-plugin": "^2.30.1",
     "koa-convert": "^1.2.0",
     "koa-webpack-middleware": "^1.0.7",
+    "nodemon": "^1.14.10",
     "uglifyjs-webpack-plugin": "^1.0.0-rc.0",
     "webpack": "^3.10.0",
     "webpack-cdn-plugin": "^1.7.1"
