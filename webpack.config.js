@@ -1,3 +1,4 @@
+const path = require('path')
 const webpack = require('webpack')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -60,7 +61,7 @@ module.exports = {
       {
         test: /\.jsx?$/,
         use: 'babel-loader',
-        exclude: /node_modules/
+        include: path.resolve(__dirname, 'client')
       },
       {
         test: /\.css$/,
@@ -74,7 +75,8 @@ module.exports = {
               localIdentName: '[path][name]_[local]__[hash:base64:5]'
             }
           }
-        ]
+        ],
+        include: path.resolve(__dirname, 'client')
       }
     ]
   },
