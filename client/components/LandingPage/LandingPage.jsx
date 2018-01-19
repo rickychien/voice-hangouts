@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 
 import styles from './LandingPage.css'
@@ -6,10 +5,6 @@ import styles from './LandingPage.css'
 const DOMAIN_URL = 'voice-hangouts.herokuapp.com/'
 
 class LandingPage extends React.PureComponent {
-  static propTypes = {
-    connector: PropTypes.object.isRequired
-  }
-
   state = {
     roomName: ''
   }
