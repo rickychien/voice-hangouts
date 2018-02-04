@@ -6,7 +6,6 @@ Voice hangouts with your friends
 
 * [node] >= 9.3.0
 * [npm] >= 5.6.0
-* [yarn] >= 1.3.2
 
 ## Techniques
 
@@ -23,16 +22,16 @@ Voice hangouts with your friends
 
 #### Development
 
-1. Install packages by [npm] or [yarn]
+1. Install packages via [npm]
 
   ```
-  yarn install
+  npm install
   ```
 
 2. Start webpack development server
 
   ```
-  yarn start
+  npm start
   ```
 
 3. Visit <http://localhost:3000> in browser
@@ -41,16 +40,16 @@ Voice hangouts with your friends
 
   Production build will exclude unnecessary resources (e.g. [redux-logger] only enable in development mode), minimizing resources and shipping production build libraries for real website experience.
 
-1. Install packages by [npm] or [yarn]
+1. Install packages via [npm]
 
   ```
-  yarn install
+  npm install
   ```
 
 2. Start production server
 
   ```
-  NODE_ENV=production yarn start
+  NODE_ENV=production npm start
   ```
 
 3. Visit <http://localhost:3000> in browser
@@ -58,12 +57,11 @@ Voice hangouts with your friends
 #### Clean up artifact resources
 
   ```
-  yarn clean
+  npm clean
   ```
 
 [node]: https://nodejs.org/
 [npm]: https://www.npmjs.com/
-[yarn]: https://yarnpkg.com/
 [react]: https://github.com/facebook/react
 [redux]: http://redux.js.org/
 [react-redux]: https://github.com/reactjs/react-redux
