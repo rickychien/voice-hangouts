@@ -4,6 +4,8 @@ import volumeMeter from 'volume-meter'
 
 import styles from './VolumeMeter.css'
 
+const AudioContext = window.AudioContext || window.webkitAudioContext
+
 class VolumeMeter extends React.PureComponent {
   static propTypes = {
     enabled: PropTypes.bool.isRequired,
