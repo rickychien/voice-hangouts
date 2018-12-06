@@ -17,14 +17,11 @@ class VolumeMeter extends React.PureComponent {
   }
 
   componentDidMount () {
-    const { stream } = this.props
-
     const audioContext = new AudioContext()
     this.meter = volumeMeter(audioContext, { tweenIn: 2, tweenOut: 6 }, (volume) => {
       this.setState({ volume: this.props.enabled ? volume * 2 : 0 })
     })
-    const source = audioContext.createMediaStreamSource(stream)
-    source.connect(this.meter)
+    audioContext.createMediaStreamSource(this.props.stream).connect(this.meter)
   }
 
   componentWillUnmount () {
