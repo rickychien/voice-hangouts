@@ -22,10 +22,9 @@ class Room extends React.PureComponent {
     message: ''
   }
 
-  async componentDidMount () {
-    const { connector } = this.props
-    const stream = await connector.getUserMedia()
-    this.props.setUser({ stream })
+  componentDidMount = async () => {
+    const { connector, setUser } = this.props
+    setUser({ stream: await connector.getUserMedia() })
     window.addEventListener('beforeunload', this.onLeaveRoom)
   }
 
@@ -35,13 +34,12 @@ class Room extends React.PureComponent {
 
   onEditUserName = () => {
     const { connector, setUser, user } = this.props
-    const userName = window.prompt('Edit your username:', this.props.user.userName)
+    const userName = window.prompt('Edit your username:', user.userName)
     setUser({ userName })
     connector.sendUpdate({ uid: user.uid, userName })
   }
 
-  onInputChange = (evt) => {
-    const { target: { name, value } } = evt
+  onInputChange = ({ target: { name, value } }) => {
     this.setState({ [name]: value })
   }
 
@@ -49,10 +47,9 @@ class Room extends React.PureComponent {
     this.props.connector.leaveRoom()
   }
 
-  onSendMessage = (evt) => {
-    const { key, type } = evt
-    const { message } = this.state
+  onSendMessage = ({ key, type }) => {
     const { connector } = this.props
+    const { message } = this.state
 
     if ((key === 'Enter' || type === 'click') && message) {
       connector.sendMessage(message)
@@ -61,19 +58,19 @@ class Room extends React.PureComponent {
   }
 
   onUserControlClick = ({ target }) => {
-    const { connector } = this.props
+    const { connector, toggleUserAudio } = this.props
     const { uid } = target.dataset
 
     connector.toggleMediaStream(uid)
-    this.props.toggleUserAudio(uid)
+    toggleUserAudio(uid)
   }
 
   getUserControlIcon = (uid, mute) => {
     if (this.props.user.uid === uid) {
       return !mute ? styles.mic : styles.micOff
+    } else {
+      return !mute ? styles.volumeUp : styles.volumeOff
     }
-
-    return !mute ? styles.volumeUp : styles.volumeOff
   }
 
   getUserName = (uid) => {
