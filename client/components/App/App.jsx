@@ -1,11 +1,9 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-
 import Actions from '../../actions'
 import LandingPage from '../LandingPage'
 import Room from '../Room'
-
 import './App.css'
 
 const roomName = window.location.pathname.replace('/', '')
@@ -36,13 +34,17 @@ class App extends React.PureComponent {
 
   render () {
     const { connector } = this.props
-    return !roomName ? <LandingPage connector={connector} /> : <Room connector={connector} />
+    return !roomName ? (
+      <LandingPage connector={connector} />
+    ) : (
+      <Room connector={connector} />
+    )
   }
 }
 
 export default connect(
   null,
-  (dispatch) => ({
-    setUser: (payload) => dispatch(Actions.setUser(payload))
+  dispatch => ({
+    setUser: payload => dispatch(Actions.setUser(payload))
   })
 )(App)

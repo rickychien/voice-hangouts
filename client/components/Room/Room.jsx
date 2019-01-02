@@ -73,7 +73,7 @@ class Room extends React.PureComponent {
     }
   }
 
-  getUserName = (uid) => {
+  getUserName = uid => {
     const { clients, user } = this.props
     if (uid === user.uid) {
       return user.userName
@@ -84,66 +84,70 @@ class Room extends React.PureComponent {
   }
 
   isUrl (url) {
-    return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig.test(url)
+    return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi.test(
+      url
+    )
   }
 
   render () {
     const { chatRoomReady, clients, connector, messages, user } = this.props
     const { message } = this.state
-    const users = [user, ...Array.from(clients.values())].filter((client) => client.uid)
+    const users = [user, ...Array.from(clients.values())].filter(
+      client => client.uid
+    )
 
     return (
       <div className={styles.room}>
         <div className={styles.userList}>
           <h3>Voice Hangouts</h3>
-          {
-            users.map(({ uid, userName, stream, mute }) => (
-              <div key={uid} className={styles.userListRow}>
-                <button
-                  className={styles.userControlIcon + ' ' + this.getUserControlIcon(uid, mute)}
-                  onClick={this.onUserControlClick}
-                  disabled={!stream}
-                  data-uid={uid}
-                  data-mute={mute}
-                />
-                <span className={styles.userListName}>{ userName }</span>
-                {
-                  stream && <VolumeMeter
-                    connector={connector}
-                    enabled={!!stream && !mute}
-                    stream={stream}
-                  />
+          {users.map(({ uid, userName, stream, mute }) => (
+            <div key={uid} className={styles.userListRow}>
+              <button
+                className={
+                  styles.userControlIcon +
+                  ' ' +
+                  this.getUserControlIcon(uid, mute)
                 }
-              </div>
-            ))
-          }
+                onClick={this.onUserControlClick}
+                disabled={!stream}
+                data-uid={uid}
+                data-mute={mute}
+              />
+              <span className={styles.userListName}>{userName}</span>
+              {stream && (
+                <VolumeMeter
+                  connector={connector}
+                  enabled={!!stream && !mute}
+                  stream={stream}
+                />
+              )}
+            </div>
+          ))}
         </div>
         <div className={styles.chatRoom}>
           <div className={styles.messages}>
-            {
-              messages.map((msg) =>
-                (
-                  <div key={msg.mid} className={styles.messageRow}>
-                    <div className={styles.messageUser}>
-                      { `${this.getUserName(msg.uid)}:` }
-                    </div>
-                    <div className={styles.messageContent}>
-                      {
-                        !this.isUrl(msg.message)
-                          ? msg.message
-                          : <a target='_blank' href={msg.message}>{ msg.message }</a>
-                      }
-                    </div>
-                    <div
-                      className={styles.timestamp}
-                      title={msg.timestamp.toLocaleDateString()}
-                    >
-                      { `${msg.timestamp.toLocaleTimeString()}` }
-                    </div>
-                  </div>
-                )
-              )
-            }
+            {messages.map(msg => (
+              <div key={msg.mid} className={styles.messageRow}>
+                <div className={styles.messageUser}>
+                  {`${this.getUserName(msg.uid)}:`}
+                </div>
+                <div className={styles.messageContent}>
+                  {!this.isUrl(msg.message) ? (
+                    msg.message
+                  ) : (
+                    <a target='_blank' href={msg.message}>
+                      {msg.message}
+                    </a>
+                  )}
+                </div>
+                <div
+                  className={styles.timestamp}
+                  title={msg.timestamp.toLocaleDateString()}
+                >
+                  {`${msg.timestamp.toLocaleTimeString()}`}
+                </div>
+              </div>
+            ))}
           </div>
           <div className={styles.messageBox} disabled={!chatRoomReady}>
             <button
@@ -152,7 +156,7 @@ class Room extends React.PureComponent {
               onClick={this.onEditUserName}
               onKeyPress={this.onEditUserName}
             >
-              <span className={styles.userName}>{ user.userName }</span>
+              <span className={styles.userName}>{user.userName}</span>
             </button>
             <input
               autoFocus
@@ -172,30 +176,27 @@ class Room extends React.PureComponent {
             />
           </div>
         </div>
-        {
-          Array.from(clients).filter(([, peer]) => peer.streamUrl).map(([id, peer]) => (
-            <audio
-              key={id}
-              autoPlay
-              src={peer.streamUrl}
-            />
-          ))
-        }
+        {Array.from(clients)
+          .filter(([, peer]) => peer.streamUrl)
+          .map(([id, peer]) => (
+            <audio key={id} autoPlay src={peer.streamUrl} />
+          ))}
       </div>
     )
   }
 }
 
 export default connect(
-  (state) => ({
+  state => ({
     clients: state.clients,
     chatRoomReady: state.chatRoomReady,
     messages: state.messages,
     user: state.user
   }),
-  (dispatch) => ({
-    addMessage: (userName, message) => dispatch(Actions.addMessage(userName, message)),
-    setUser: (payload) => dispatch(Actions.setUser(payload)),
-    toggleUserAudio: (uid) => dispatch(Actions.toggleUserAudio(uid))
+  dispatch => ({
+    addMessage: (userName, message) =>
+      dispatch(Actions.addMessage(userName, message)),
+    setUser: payload => dispatch(Actions.setUser(payload)),
+    toggleUserAudio: uid => dispatch(Actions.toggleUserAudio(uid))
   })
 )(Room)
