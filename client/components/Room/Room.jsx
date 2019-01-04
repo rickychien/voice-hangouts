@@ -1,10 +1,8 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-
 import Actions from '../../actions'
 import VolumeMeter from '../VolumeMeter'
-
 import styles from './Room.css'
 
 class Room extends React.PureComponent {
@@ -24,6 +22,8 @@ class Room extends React.PureComponent {
 
   componentDidMount = async () => {
     const { connector, setUser } = this.props
+    connector.connect()
+    connector.joinRoom()
     setUser({ stream: await connector.getUserMedia() })
     window.addEventListener('beforeunload', this.onLeaveRoom)
   }
