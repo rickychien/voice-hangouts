@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import volumeMeter from 'volume-meter'
 import styles from './VolumeMeter.css'
 
-export default function VolumeMeter ({ enabled, stream }) {
+function VolumeMeter ({ enabled, stream }) {
   const [volume, setVolume] = useState(0)
 
   useEffect(() => {
@@ -36,3 +36,5 @@ VolumeMeter.propTypes = {
   enabled: PropTypes.bool.isRequired,
   stream: PropTypes.object.isRequired
 }
+
+export default VolumeMeter

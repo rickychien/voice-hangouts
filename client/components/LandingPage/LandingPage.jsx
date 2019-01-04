@@ -3,7 +3,7 @@ import styles from './LandingPage.css'
 
 const DOMAIN_URL = 'voice-hangouts.herokuapp.com/'
 
-export default function LandingPage () {
+function LandingPage () {
   const inputRef = createRef()
 
   function joinRoom () {
@@ -41,3 +41,5 @@ export default function LandingPage () {
     </div>
   )
 }
+
+export default LandingPage
