@@ -10,6 +10,8 @@ import LandingPage from './components/LandingPage'
 import Room from './components/Room'
 import './index.css'
 
+window.AudioContext = window.AudioContext || window.webkitAudioContext
+
 const ROOM_NAME = window.location.pathname.replace('/', '') || ''
 const HOST = location.href.replace(/^http/, 'ws')
 const store = configureStore()

@@ -1,80 +1,67 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, { createRef, useEffect } from 'react'
 import { connect } from 'react-redux'
 import Actions from '../../actions'
 import VolumeMeter from '../VolumeMeter'
 import styles from './Room.css'
 
-class Room extends React.PureComponent {
-  static propTypes = {
-    connector: PropTypes.object.isRequired,
-    chatRoomReady: PropTypes.bool.isRequired,
-    clients: PropTypes.object.isRequired,
-    messages: PropTypes.array.isRequired,
-    setUser: PropTypes.func.isRequired,
-    toggleUserAudio: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired
-  }
+function Room ({
+  chatRoomReady,
+  clients,
+  connector,
+  messages,
+  setUser,
+  toggleUserAudio,
+  user
+}) {
+  const msgInputRef = createRef()
 
-  state = {
-    message: ''
-  }
-
-  componentDidMount = async () => {
-    const { connector, setUser } = this.props
+  useEffect(async () => {
     connector.connect()
     connector.joinRoom()
     setUser({ stream: await connector.getUserMedia() })
-    window.addEventListener('beforeunload', this.onLeaveRoom)
-  }
+    window.addEventListener('beforeunload', onLeaveRoom)
 
-  componentWillUnmount () {
-    window.removeEventListener(this.onLeaveRoom)
-  }
+    return () => {
+      window.removeEventListener(onLeaveRoom)
+    }
+  }, [])
 
-  onEditUserName = () => {
-    const { connector, setUser, user } = this.props
+  function onEditUserName () {
     const userName = window.prompt('Edit your username:', user.userName)
     setUser({ userName })
     connector.sendUpdate({ uid: user.uid, userName })
   }
 
-  onInputChange = ({ target: { name, value } }) => {
-    this.setState({ [name]: value })
+  function onLeaveRoom () {
+    connector.leaveRoom()
   }
 
-  onLeaveRoom = () => {
-    this.props.connector.leaveRoom()
-  }
-
-  onSendMessage = ({ key, type }) => {
-    const { connector } = this.props
-    const { message } = this.state
+  function onSendMessage ({ key, type }) {
+    const message = msgInputRef.current.value
 
     if ((key === 'Enter' || type === 'click') && message) {
       connector.sendMessage(message)
-      this.setState({ message: '' })
+      msgInputRef.current.value = ''
     }
   }
 
-  onUserControlClick = ({ target }) => {
-    const { connector, toggleUserAudio } = this.props
+  function onUserControlClick ({ target }) {
     const { uid } = target.dataset
 
     connector.toggleMediaStream(uid)
     toggleUserAudio(uid)
   }
 
-  getUserControlIcon = (uid, mute) => {
-    if (this.props.user.uid === uid) {
+  function getUserControlIcon (uid, mute) {
+    if (user.uid === uid) {
       return !mute ? styles.mic : styles.micOff
     } else {
       return !mute ? styles.volumeUp : styles.volumeOff
     }
   }
 
-  getUserName = uid => {
-    const { clients, user } = this.props
+  function getUserName (uid) {
     if (uid === user.uid) {
       return user.userName
     }
@@ -83,107 +70,105 @@ class Room extends React.PureComponent {
     return client ? client.userName : 'Guest'
   }
 
-  isUrl (url) {
+  function isUrl (url) {
     return /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi.test(
       url
     )
   }
 
-  render () {
-    const { chatRoomReady, clients, connector, messages, user } = this.props
-    const { message } = this.state
-    const users = [user, ...Array.from(clients.values())].filter(
-      client => client.uid
-    )
+  const users = [user, ...Array.from(clients.values())].filter(
+    client => client.uid
+  )
 
-    return (
-      <div className={styles.room}>
-        <div className={styles.userList}>
-          <h3>Voice Hangouts</h3>
-          {users.map(({ uid, userName, stream, mute }) => (
-            <div key={uid} className={styles.userListRow}>
-              <button
-                className={
-                  styles.userControlIcon +
-                  ' ' +
-                  this.getUserControlIcon(uid, mute)
-                }
-                onClick={this.onUserControlClick}
-                disabled={!stream}
-                data-uid={uid}
-                data-mute={mute}
-              />
-              <span className={styles.userListName}>{userName}</span>
-              {stream && (
-                <VolumeMeter
-                  connector={connector}
-                  enabled={!!stream && !mute}
-                  stream={stream}
-                />
-              )}
+  return (
+    <div className={styles.room}>
+      <div className={styles.userList}>
+        <h3>Voice Hangouts</h3>
+        {users.map(({ uid, userName, stream, mute }) => (
+          <div key={uid} className={styles.userListRow}>
+            <button
+              className={
+                styles.userControlIcon + ' ' + getUserControlIcon(uid, mute)
+              }
+              onClick={onUserControlClick}
+              disabled={!stream}
+              data-uid={uid}
+              data-mute={mute}
+            />
+            <span className={styles.userListName}>{userName}</span>
+            {stream && (
+              <VolumeMeter enabled={!!stream && !mute} stream={stream} />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className={styles.chatRoom}>
+        <div className={styles.messages}>
+          {messages.map(msg => (
+            <div key={msg.mid} className={styles.messageRow}>
+              <div className={styles.messageUser}>
+                {`${getUserName(msg.uid)}:`}
+              </div>
+              <div className={styles.messageContent}>
+                {!isUrl(msg.message) ? (
+                  msg.message
+                ) : (
+                  <a target='_blank' href={msg.message}>
+                    {msg.message}
+                  </a>
+                )}
+              </div>
+              <div
+                className={styles.timestamp}
+                title={msg.timestamp.toLocaleDateString()}
+              >
+                {`${msg.timestamp.toLocaleTimeString()}`}
+              </div>
             </div>
           ))}
         </div>
-        <div className={styles.chatRoom}>
-          <div className={styles.messages}>
-            {messages.map(msg => (
-              <div key={msg.mid} className={styles.messageRow}>
-                <div className={styles.messageUser}>
-                  {`${this.getUserName(msg.uid)}:`}
-                </div>
-                <div className={styles.messageContent}>
-                  {!this.isUrl(msg.message) ? (
-                    msg.message
-                  ) : (
-                    <a target='_blank' href={msg.message}>
-                      {msg.message}
-                    </a>
-                  )}
-                </div>
-                <div
-                  className={styles.timestamp}
-                  title={msg.timestamp.toLocaleDateString()}
-                >
-                  {`${msg.timestamp.toLocaleTimeString()}`}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className={styles.messageBox} disabled={!chatRoomReady}>
-            <button
-              className={styles.userNameBox}
-              title='Click to edit your name'
-              onClick={this.onEditUserName}
-              onKeyPress={this.onEditUserName}
-            >
-              <span className={styles.userName}>{user.userName}</span>
-            </button>
-            <input
-              autoFocus
-              className={styles.messageInput}
-              disabled={!chatRoomReady}
-              name='message'
-              placeholder='type message here...'
-              value={message}
-              onChange={this.onInputChange}
-              onKeyPress={this.onSendMessage}
-            />
-            <button
-              className={styles.sendButton}
-              disabled={!chatRoomReady}
-              value='Send'
-              onClick={this.onSendMessage}
-            />
-          </div>
+        <div className={styles.messageBox} disabled={!chatRoomReady}>
+          <button
+            className={styles.userNameBox}
+            title='Click to edit your name'
+            onClick={onEditUserName}
+            onKeyPress={onEditUserName}
+          >
+            <span className={styles.userName}>{user.userName}</span>
+          </button>
+          <input
+            ref={msgInputRef}
+            autoFocus
+            className={styles.messageInput}
+            disabled={!chatRoomReady}
+            placeholder='type message here...'
+            onKeyPress={onSendMessage}
+          />
+          <button
+            className={styles.sendButton}
+            disabled={!chatRoomReady}
+            value='Send'
+            onClick={onSendMessage}
+          />
         </div>
-        {Array.from(clients)
-          .filter(([, peer]) => peer.streamUrl)
-          .map(([id, peer]) => (
-            <audio key={id} autoPlay src={peer.streamUrl} />
-          ))}
       </div>
-    )
-  }
+      {Array.from(clients)
+        .filter(([, peer]) => peer.streamUrl)
+        .map(([id, peer]) => (
+          <audio key={id} autoPlay src={peer.streamUrl} />
+        ))}
+    </div>
+  )
+}
+
+Room.propTypes = {
+  connector: PropTypes.object.isRequired,
+  chatRoomReady: PropTypes.bool.isRequired,
+  clients: PropTypes.object.isRequired,
+  messages: PropTypes.array.isRequired,
+  setUser: PropTypes.func.isRequired,
+  toggleUserAudio: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired
 }
 
 export default connect(

@@ -1,48 +1,43 @@
-import React from 'react'
+import React, { createRef } from 'react'
 import styles from './LandingPage.css'
 
 const DOMAIN_URL = 'voice-hangouts.herokuapp.com/'
 
-class LandingPage extends React.PureComponent {
-  inputRef = React.createRef()
+export default function LandingPage () {
+  const inputRef = createRef()
 
-  onRoomNameKeyPress = evt => {
+  function joinRoom () {
+    window.location.pathname = inputRef.current.value || 'Ballroom'
+  }
+
+  function onRoomNameKeyPress (evt) {
     if (evt.key === 'Enter') {
-      this.joinRoom()
+      joinRoom()
     }
   }
 
-  joinRoom = () => {
-    window.location.pathname = this.inputRef.current.value || 'Ballroom'
-  }
-
-  render () {
-    return (
-      <div className={styles.landingPage}>
-        <h1>Voice Hangouts</h1>
-        <p key='subtitle'>Truly lightweight audio-only WebRTC chat</p>
-        <div key='form' className={styles.startChatForm}>
-          <span className={styles.createRoomInput}>
-            <span className={styles.domain}>{DOMAIN_URL}</span>
-            <input
-              ref={this.inputRef}
-              autoFocus
-              className={styles.roomNameInput}
-              placeholder='room'
-              onChange={this.onInputChange}
-              onKeyPress={this.onRoomNameKeyPress}
-            />
-          </span>
+  return (
+    <div className={styles.landingPage}>
+      <h1>Voice Hangouts</h1>
+      <p key='subtitle'>Truly lightweight audio-only WebRTC chat</p>
+      <div key='form' className={styles.startChatForm}>
+        <span className={styles.createRoomInput}>
+          <span className={styles.domain}>{DOMAIN_URL}</span>
           <input
-            className={styles.startChatButton}
-            type='submit'
-            value='Go'
-            onClick={this.joinRoom}
+            ref={inputRef}
+            autoFocus
+            className={styles.roomNameInput}
+            placeholder='room'
+            onKeyPress={onRoomNameKeyPress}
           />
-        </div>
+        </span>
+        <input
+          className={styles.startChatButton}
+          type='submit'
+          value='Go'
+          onClick={joinRoom}
+        />
       </div>
-    )
-  }
+    </div>
+  )
 }
-
-export default LandingPage
