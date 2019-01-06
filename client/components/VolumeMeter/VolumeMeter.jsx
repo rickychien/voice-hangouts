@@ -6,24 +6,30 @@ import styles from './VolumeMeter.css'
 function VolumeMeter ({ enabled, stream }) {
   const [volume, setVolume] = useState(0)
 
-  useEffect(() => {
-    const audioContext = new AudioContext()
-    let meter = volumeMeter(
-      audioContext,
-      { tweenIn: 2, tweenOut: 6 },
-      volume => {
-        if (enabled) {
-          setVolume(volume * 2)
-        }
-      }
-    )
-    audioContext.createMediaStreamSource(stream).connect(meter)
+  useEffect(
+    () => {
+      if (!enabled) return
 
-    return () => {
-      meter.stop()
-      meter = null
-    }
-  }, [])
+      const audioContext = new AudioContext()
+      let meter = volumeMeter(
+        audioContext,
+        { tweenIn: 2, tweenOut: 6 },
+        volume => {
+          if (enabled) {
+            setVolume(volume)
+          }
+        }
+      )
+      audioContext.createMediaStreamSource(stream).connect(meter)
+
+      return () => {
+        audioContext.close()
+        meter.stop()
+        meter = null
+      }
+    },
+    [enabled]
+  )
 
   return (
     <svg className={styles.volumeMeter} width={enabled ? `${volume}px` : 0}>

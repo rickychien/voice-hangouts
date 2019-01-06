@@ -1,18 +1,16 @@
-import React, { createRef } from 'react'
+import React from 'react'
 import styles from './LandingPage.css'
 
 const DOMAIN_URL = 'voice-hangouts.herokuapp.com/'
 
 function LandingPage () {
-  const inputRef = createRef()
-
-  function joinRoom () {
-    window.location.pathname = inputRef.current.value || 'Ballroom'
+  function joinRoom ({ currentTarget }) {
+    window.location.pathname = currentTarget.value || 'Ballroom'
   }
 
   function onRoomNameKeyPress (evt) {
     if (evt.key === 'Enter') {
-      joinRoom()
+      joinRoom(evt)
     }
   }
 
@@ -24,7 +22,6 @@ function LandingPage () {
         <span className={styles.createRoomInput}>
           <span className={styles.domain}>{DOMAIN_URL}</span>
           <input
-            ref={inputRef}
             autoFocus
             className={styles.roomNameInput}
             placeholder='room'

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, { createRef, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import Actions from '../../actions'
 import VolumeMeter from '../VolumeMeter'
@@ -14,8 +14,6 @@ function Room ({
   toggleUserAudio,
   user
 }) {
-  const msgInputRef = createRef()
-
   useEffect(async () => {
     connector.connect()
     connector.joinRoom()
@@ -37,12 +35,12 @@ function Room ({
     connector.leaveRoom()
   }
 
-  function onSendMessage ({ key, type }) {
-    const message = msgInputRef.current.value
+  function onSendMessage ({ key, type, currentTarget }) {
+    const message = currentTarget.value
 
     if ((key === 'Enter' || type === 'click') && message) {
       connector.sendMessage(message)
-      msgInputRef.current.value = ''
+      currentTarget.value = ''
     }
   }
 
@@ -137,7 +135,6 @@ function Room ({
             <span className={styles.userName}>{user.userName}</span>
           </button>
           <input
-            ref={msgInputRef}
             autoFocus
             className={styles.messageInput}
             disabled={!chatRoomReady}
