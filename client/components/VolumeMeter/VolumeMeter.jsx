@@ -8,31 +8,29 @@ function VolumeMeter ({ enabled, stream }) {
 
   useEffect(
     () => {
-      if (!enabled) return
+      if (!enabled) {
+        setVolume(0)
+        return
+      }
 
       const audioContext = new AudioContext()
-      let meter = volumeMeter(
+      const meter = volumeMeter(
         audioContext,
         { tweenIn: 2, tweenOut: 6 },
-        volume => {
-          if (enabled) {
-            setVolume(volume)
-          }
-        }
+        setVolume
       )
       audioContext.createMediaStreamSource(stream).connect(meter)
 
       return () => {
         audioContext.close()
         meter.stop()
-        meter = null
       }
     },
-    [enabled]
+    [enabled, stream]
   )
 
   return (
-    <svg className={styles.volumeMeter} width={enabled ? `${volume}px` : 0}>
+    <svg className={styles.volumeMeter} width={`${volume}px`}>
       <polygon points='0,20 25,0 25,20' />
     </svg>
   )
