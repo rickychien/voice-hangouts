@@ -1,6 +1,13 @@
 parser: babel-eslint
-extends: ["standard", "standard-react"]
+extends:
+  - standard
+  - standard-react
 env:
   browser: true
   mocha: true
   node: true
+plugins:
+  - react-hooks
+rules:
+  react-hooks/rules-of-hooks: error
+  react-hooks/exhaustive-deps: warn

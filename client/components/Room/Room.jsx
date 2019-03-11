@@ -14,25 +14,30 @@ function Room ({
   toggleUserAudio,
   user
 }) {
-  useEffect(async () => {
-    connector.connect()
-    connector.joinRoom()
-    setUser({ stream: await connector.getUserMedia() })
-    window.addEventListener('beforeunload', onLeaveRoom)
+  useEffect(
+    () => {
+      function onLeaveRoom () {
+        connector.leaveRoom()
+      }
 
-    return () => {
-      window.removeEventListener(onLeaveRoom)
-    }
-  }, [])
+      ;(async () => {
+        connector.connect()
+        connector.joinRoom()
+        setUser({ stream: await connector.getUserMedia() })
+        window.addEventListener('beforeunload', onLeaveRoom)
+      })()
+
+      return () => {
+        window.removeEventListener(onLeaveRoom)
+      }
+    },
+    [connector, setUser]
+  )
 
   function onEditUserName () {
     const userName = window.prompt('Edit your username:', user.userName)
     setUser({ userName })
     connector.sendUpdate({ uid: user.uid, userName })
-  }
-
-  function onLeaveRoom () {
-    connector.leaveRoom()
   }
 
   function onSendMessage ({ key, type, currentTarget }) {
