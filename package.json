@@ -16,6 +16,10 @@
     "serve": "node server/index.js",
     "heroku-postbuild": "npm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "ssh://github.com/rickychien/voice-hangouts.git"
+  },
   "dependencies": {
     "css-loader": "^0.28.7",
     "font-awesome": "^4.7.0",
@@ -24,8 +28,8 @@
     "koa-send": "^4.1.1",
     "koa-websocket": "^5.0.1",
     "prop-types": "^15.6.0",
-    "react": "^16.8.3",
-    "react-dom": "^16.8.3",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
     "react-redux": "^5.1.1",
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
